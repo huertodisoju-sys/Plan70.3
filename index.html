@@ -175,7 +175,7 @@
   .velo.on{opacity:1;pointer-events:auto}
   .hoja{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-radius:22px 22px 0 0;z-index:51;max-height:88vh;overflow-y:auto;
         padding:10px 18px calc(18px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
-  .hoja.on{transform:translateY(0)}
+  .hoja{visibility:hidden}.hoja.on{transform:translateY(0);visibility:visible}
   .hoja .asa{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
   .hoja h3{font-size:17px;font-weight:800}
   .hoja .sub{margin-bottom:6px}
@@ -200,7 +200,7 @@
   /* aviso flotante */
   .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translate(-50%,-160%);background:var(--ink);color:var(--bg);
          padding:10px 16px;border-radius:999px;font-size:13px;font-weight:700;z-index:70;transition:transform .3s;max-width:92vw;text-align:center}
-  .toast.on{transform:translate(-50%,0)}
+  .toast{visibility:hidden}.toast.on{transform:translate(-50%,0);visibility:visible}
   /* modo entrenamiento */
   .entreno{position:fixed;inset:0;background:var(--bg);z-index:60;display:none;flex-direction:column;
            padding:calc(12px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom))}
@@ -228,10 +228,26 @@
   .e-ring small{display:block;font-size:12px;color:var(--slate);font-weight:700}
   .e-pie{display:flex;gap:10px}
   .e-pie button{flex:1;height:56px;border:none;border-radius:16px;font-size:16px;font-weight:800}
-  .e-ok{background:var(--teal);color:#fff}.e-alt{background:var(--soft);color:var(--ink);flex:.6!important}
+  .e-ok{background:var(--teal);color:#fff}.e-col{flex-direction:column;gap:8px}.e-col button{flex:none!important;width:100%;height:54px}.e-col .e-alt{height:46px}.e-alt{background:var(--soft);color:var(--ink);flex:.6!important}
   .flash{animation:flash .6s ease 2}@keyframes flash{50%{background:var(--sun)}}
   .resumen-e{text-align:left;margin-top:14px}
   .resumen-e .item b{font-size:13.5px}
+  /* kinegun */
+  .kin{border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px}
+  .kin .top{display:flex;gap:12px;align-items:center}
+  .cab{width:44px;height:44px;border-radius:12px;background:var(--soft);display:grid;place-items:center;flex:none;color:var(--blue)}
+  .cab svg{width:30px;height:30px}
+  .kin h3{font-size:14.5px;font-weight:800;line-height:1.25}
+  .kin .bloque{font-size:11px;color:var(--slate);font-weight:700;margin-top:2px}
+  .kin .stats{grid-template-columns:repeat(3,1fr)}
+  .kin.hecho{background:var(--okbg);border-color:var(--okline)}
+  .guiaK{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+  .gk{display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:12px;background:var(--soft)}
+  .gk b{font-size:13px;display:block}.gk span{font-size:12px;color:var(--slate);line-height:1.4;display:block;margin-top:2px}
+  .niv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:12.5px;margin-top:8px;align-items:center}
+  .niv i{display:block;height:8px;border-radius:4px;background:var(--teal)}
+  .hoja h4{font-size:13px;font-weight:800;color:var(--blue);margin-top:16px}
+  .hoja ul{margin:6px 0 0 18px;font-size:12.5px;line-height:1.55}
   .cargando{text-align:center;padding:60px 0;color:var(--slate);font-weight:600}
   @media(min-width:640px){.grid{grid-template-columns:repeat(4,1fr)}.stats{grid-template-columns:repeat(6,1fr)}.insignias{grid-template-columns:repeat(6,1fr)}}
 </style>
@@ -273,7 +289,7 @@
    CONFIGURACIÓN
    ========================================================= */
 // ⬇️ Pega entre las comillas el link de tu app (el que termina en /exec)
-const APP_URL = 'https://script.google.com/macros/s/AKfycbwVhFqcRGDbH6QJ5XE99IzZWXouHoZSpP3ANt3TTJyTOtDGm83w7QKnWJUwLT-XTpSgqw/exec';
+const APP_URL = 'PEGA_AQUI_EL_LINK_DE_TU_APP';
 // Lugar para el pronóstico del domingo (Santiago). Cámbialo si sales desde otro punto.
 const CLIMA_LAT = -33.45, CLIMA_LON = -70.66, CLIMA_LUGAR = 'Santiago';
 
@@ -359,8 +375,10 @@ $('ventana').addEventListener('touchend', e => {
    ========================================================= */
 let tRest = 0, tInt = null;
 function segundos(txt) {
-  const m = String(txt).match(/(\d+)\s*(min|s)/i);
-  return m ? (m[2].toLowerCase() === 'min' ? +m[1] * 60 : +m[1]) : 60;
+  const m = String(txt).match(/(\d+(?:[.,]\d+)?)\s*(min|s)/i);
+  if (!m) return 60;
+  const v = parseFloat(m[1].replace(',', '.'));
+  return Math.round(m[2].toLowerCase() === 'min' ? v * 60 : v);
 }
 function iniciarTimer(seg) {
   prepararAudio();
@@ -463,6 +481,88 @@ function abrirPeso() {
 }
 
 /* =========================================================
+   KINEGUN PRO II
+   ========================================================= */
+const CAB = {
+  'Redondo mediano': ['<circle cx="20" cy="13" r="10"/><rect x="16" y="23" width="8" height="15" rx="2"/>', 'Bola. Masaje general de músculos grandes: cuádriceps, glúteos, hombro posterior.'],
+  'Plano': ['<rect x="7" y="9" width="26" height="9" rx="4"/><rect x="16" y="18" width="8" height="20" rx="2"/>', 'Disco plano. Músculos grandes y densos: cuádriceps y pecho. Reparte la presión, ideal para empezar.'],
+  'Pala': ['<rect x="5" y="6" width="30" height="10" rx="2"/><rect x="16" y="16" width="8" height="22" rx="2"/>', 'Rectangular. Áreas grandes y largas: isquiotibiales y dorsales.'],
+  'Paravertebral': ['<path d="M9 5v8a11 11 0 0 0 22 0V5" fill="none" stroke-width="5" stroke-linecap="round"/><rect x="16" y="22" width="8" height="16" rx="2"/>', 'Forma de U. A ambos lados de la columna (nunca encima) y para "abrazar" los gemelos.'],
+  'Pulgar': ['<path d="M14 24 L14 12 Q14 5 21 6 L27 8 Q30 10 27 13 L21 13 L21 24Z"/><rect x="14" y="24" width="8" height="14" rx="2"/>', 'Como un pulgar. Puntos tensos precisos: trapecio, entre el cuello y el hombro.'],
+  'Bala': ['<path d="M15 24 V12 Q15 4 20 4 Q25 4 25 12 V24Z"/><rect x="16" y="24" width="8" height="14" rx="2"/>', 'Cilíndrico con punta. Profundo y focalizado en un punto: glúteo medio. Nivel bajo.'],
+  'Cono': ['<path d="M20 3 L27 24 H13Z"/><rect x="16" y="24" width="8" height="14" rx="2"/>', 'Punta fina. Puntos de activación muy específicos. Por ahora no lo usamos: es el más agresivo.'],
+  'Acolchado': ['<path d="M6 19 A14 12 0 0 1 34 19Z"/><rect x="16" y="19" width="8" height="19" rx="2"/>', 'Blando. Zonas sensibles o con poco músculo: antebrazos, canilla, planta del pie, pecho.'],
+  'Sensitive cóncavo': ['<path d="M5 8 Q20 20 35 8 L35 14 Q20 26 5 14Z"/><g stroke-width="3" stroke-linecap="round"><path d="M8 7v-3M14 11v-3M20 13v-3M26 11v-3M32 7v-3" fill="none"/></g><rect x="16" y="20" width="8" height="18" rx="2"/>', 'Cóncavo con puntas suaves: se adapta a hombros y pantorrillas. Ideal para activar antes de entrenar.'],
+  'Sensitive convexo': ['<path d="M7 18 A13 11 0 0 1 33 18Z"/><g stroke-width="3" stroke-linecap="round" fill="none"><path d="M12 9l-2-3M20 6v-4M28 9l2-3"/></g><rect x="16" y="18" width="8" height="20" rx="2"/>', 'Convexo con puntas suaves. Zonas blandas y sensibles: flexor de cadera.']
+};
+const svgCab = n => `<svg viewBox="0 0 40 40" fill="currentColor" stroke="currentColor">${(CAB[n] || CAB['Redondo mediano'])[0]}</svg>`;
+const claveKin = (m, n) => 'kin|' + new Date().toDateString() + '|' + m + '|' + n;
+function tarjetaKine(momento) {
+  const R = D.recuperacion, filas = R.filas.filter(f => f.momento === momento);
+  if (!filas.length) return '';
+  const antes = momento === 'Antes';
+  const items = filas.map((f, k) => {
+    const hecho = leer(claveKin(momento, f.que)) === '1';
+    return `<div class="kin${hecho ? ' hecho' : ''}" data-q="${esc(f.que)}">
+      <div class="top"><div class="cab">${svgCab(f.cabezal)}</div><div style="flex:1;min-width:0"><h3>${esc(f.que)}</h3><div class="bloque">Cabezal ${esc(f.cabezal)}</div></div>
+        <button class="check">${hecho ? 'Hecho' : 'Marcar'}</button></div>
+      <div class="stats">
+        <div class="stat"><small>Nivel</small><strong>${esc(f.nivel)}</strong></div>
+        <div class="stat reloj" data-seg="${segundos(f.tiempo)}"><small>Tiempo</small><strong>${esc(f.tiempo)}</strong></div>
+        <div class="stat"><small>Ritmo</small><strong>${antes ? 'Rápido' : 'Lento'}</strong></div>
+      </div>
+      <div class="fila-btn"><button class="lnk guiaBtn">📖 Ver cómo hacerlo ▾</button></div>
+      <div class="guia"><div class="g1"><b>Cómo hacerlo</b>${esc(f.como)}</div>
+        ${f.error ? `<div class="g2"><b>Evita</b>${esc(f.error)}</div>` : ''}
+        <div class="g3"><b>Cabezal ${esc(f.cabezal)}</b>${esc((CAB[f.cabezal] || ['', ''])[1])}</div></div></div>`;
+  }).join('');
+  const titulo = antes ? '🔥 Kinegun · activación antes de entrenar' : '💆 Kinegun · recuperación después';
+  const sub = antes ? 'Pasadas rápidas y livianas, 1–2 min en total. Solo despiertas el músculo: nada de quedarse apretando.'
+                    : String(R.resumen).replace(/^Antes:[^·]*·\s*/, '');
+  return tarjeta(antes ? 'kinA' : 'kinD', titulo, sub,
+    `${items}<div class="fila-btn" style="margin-top:12px"><span class="vacio">Toca <b>Tiempo</b> para el temporizador.</span><button class="btn2 guiaKin">📘 Guía de tu Kinegun</button></div>`);
+}
+function activarKine(cont) {
+  cont.querySelectorAll('.kin').forEach(k => {
+    const mom = k.closest('.card').dataset.id === 'kinA' ? 'Antes' : 'Después';
+    k.querySelector('.check').onclick = () => {
+      const si = !k.classList.contains('hecho'); k.classList.toggle('hecho', si);
+      guardar(claveKin(mom, k.dataset.q), si ? '1' : '0'); k.querySelector('.check').textContent = si ? 'Hecho' : 'Marcar';
+    };
+    k.querySelector('.guiaBtn').onclick = ev => {
+      const g = k.querySelector('.guia'); g.classList.toggle('abierta');
+      ev.target.textContent = g.classList.contains('abierta') ? '📖 Ocultar guía ▴' : '📖 Ver cómo hacerlo ▾';
+    };
+    k.querySelector('.stat.reloj').onclick = function () { iniciarTimer(+this.dataset.seg); };
+  });
+  cont.querySelectorAll('.guiaKin').forEach(b => b.onclick = abrirGuiaKine);
+}
+function abrirGuiaKine() {
+  const usados = new Set(D.recuperacion.filas.map(f => f.cabezal));
+  const niveles = [['1–5', 'Masaje suave', 17], ['6–10', 'Moderado · zonas sensibles', 34], ['11–15', 'Estimulación muscular · tu rango normal', 51],
+                   ['16–20', 'Relajación miofascial · solo glúteos y cuádriceps, más adelante', 68], ['21–25', 'Profesional', 84], ['26–30', 'Experto · no lo necesitas', 100]];
+  abrirHoja(`<h3>📘 Guía de tu Kinegun Pro II</h3><div class="sub">Resumen del manual adaptado a tu plan.</div>
+    <h4>Cómo encenderla</h4><ul>
+      <li>Con la pistola <b>apagada</b>, pon el cabezal presionando hacia adentro (para sacarlo, tira hacia afuera).</li>
+      <li>Interruptor de la base del mango en <b>ON</b> y luego el botón de <b>Inicio</b>.</li>
+      <li>Sube o baja el nivel con <b>+</b> y <b>−</b>. La pantalla muestra el nivel (1–30) y la batería (0–99).</li>
+      <li>Se apaga sola a los <b>10 min</b>: vuelve a presionar Inicio para seguir.</li></ul>
+    <h4>La técnica, en 4 reglas</h4><ul>
+      <li><b>Apoya, no aprietes:</b> deja que el peso de la pistola trabaje.</li>
+      <li><b>Antes de entrenar:</b> 15–30 s por zona, pasadas rápidas. <b>Después:</b> 1–2 min por músculo, lento (2–3 cm por segundo).</li>
+      <li>Si encuentras un punto tenso, quédate máximo 10 s y sigue.</li>
+      <li>Si duele o la piel se pone muy roja, baja el nivel o cambia a un cabezal más blando.</li></ul>
+    <h4>Niveles de intensidad</h4><div class="niv">${niveles.map(n => `<b>${n[0]}</b><div><i style="width:${n[2]}%"></i><span class="vacio">${n[1]}</span></div>`).join('')}</div>
+    <div class="ayuda">Las 2 primeras semanas no pases del nivel 15.</div>
+    <h4>Tus 10 cabezales</h4><div class="guiaK">${Object.keys(CAB).map(n => `<div class="gk"><div class="cab">${svgCab(n)}</div><div><b>${esc(n)}${usados.has(n) ? ' · lo usas hoy' : ''}</b><span>${esc(CAB[n][1])}</span></div></div>`).join('')}</div>
+    <h4>Nunca la uses en</h4><ul><li>Cara, cabeza y parte delantera del cuello.</li><li>Columna (por encima), huesos, rótula, detrás de la rodilla y zona genital.</li>
+      <li>Heridas, moretones, zonas inflamadas o lesiones recientes.</li><li>Si tienes trombosis, un trastorno de coagulación o lo indica tu médico.</li></ul>
+    <h4>Batería</h4><ul><li>Carga completa: unas 2,5 h. Desenchúfala al terminar.</li><li>Mantenla sobre 40% y no la dejes descargarse por completo.</li>
+      <li>Dura entre 2 y 8 h según el nivel. No la uses más de 1 hora seguida: deja que descanse 30 min.</li></ul>
+    <button class="primario" onclick="cerrarHoja()">Entendido</button>`);
+}
+
+/* =========================================================
    VISTA HOY
    ========================================================= */
 const claveHecho = n => 'hecho|' + new Date().toDateString() + '|' + n;
@@ -483,6 +583,7 @@ function pintarHoy() {
     ${d.ejercicios.length ? `<button class="accion a1" id="btnEntreno"><b>▶ Modo entrenamiento</b><small>${d.ejercicios.length} ejercicios, uno a la vez</small></button>` : ''}
     <button class="accion a2 ${d.ejercicios.length ? '' : 'solo'}" id="btnPeso"><b>⚖️ ${d.pesoHoy ? fmt(d.pesoHoy) + ' kg' : 'Peso de hoy'}</b><small>${d.pesoHoy ? 'Registrado hoy · tocar para cambiar' : 'Anótalo en 5 segundos'}</small></button></div>`;
   if (d.fondo && (dow >= 5 || dow === 0)) h += `<div id="climaHoy"></div>`;
+  h += tarjetaKine('Antes');
   if (d.ejercicios.length) {
     const ej = d.ejercicios.map((e, i) => {
       const hecho = estaHecho(e);
@@ -520,8 +621,9 @@ function pintarHoy() {
   if (d.ruta.horario.length) h += tarjeta('ruta', esc(d.ruta.titulo), d.ruta.resumen, lista(d.ruta.horario, 'hora', 'momento', 'que', 'dato'));
   else if (d.ruta.resumen) h += tarjeta('ruta', '🚴 Próximo fondo', d.ruta.resumen, '');
   h += tarjeta('com', '🍽️ Tus comidas de hoy', d.comidas.resumen, lista(d.comidas.filas, 'hora', 'comida', 'que', 'dato'));
-  if (d.recuperacion.filas.length) h += tarjeta('rec', esc(d.recuperacion.titulo), d.recuperacion.resumen, lista(d.recuperacion.filas, 'n', 'que', 'como', 'dosis'));
+  h += tarjetaKine('Después');
   $('v0').innerHTML = h;
+  activarKine($('v0'));
   contarHechos();
   if ($('btnEntreno')) $('btnEntreno').onclick = abrirEntreno;
   $('btnPeso').onclick = abrirPeso;
@@ -636,8 +738,8 @@ function pintarFinEntreno() {
     <div class="e-obj">${hechos.length} de ${D.ejercicios.length} ejercicios hechos. Guarda lo que hiciste para que la planilla ajuste tus próximos pesos.</div>
     <div class="resumen-e">${hechos.map(x => `<div class="item"><div class="hora">✓</div><div><b>${esc(x.e.ejercicio)}</b>
       <span>${x.e.conPeso ? fmt(x.r.kg) + ' kg · ' : ''}${x.r.reps.filter(v => v !== '').length ? x.r.reps.join(' / ') + ' reps' : 'hecho'}${x.r.rpe ? ' · RPE ' + x.r.rpe : ''}</span></div></div>`).join('')}</div></div>
-    <div class="e-pie" style="flex-direction:column;gap:6px"><button class="e-ok" id="eGuardar" ${hechos.some(x => x.e.fila) ? '' : 'disabled'}>💾 Guardar en la planilla</button>
-      <button class="e-alt" id="eNo" style="flex:1!important;height:46px">Salir sin guardar</button></div>`;
+    <div class="e-pie e-col"><button class="e-ok" id="eGuardar" ${hechos.some(x => x.e.fila) ? '' : 'disabled'}>💾 Guardar en la planilla</button>
+      <button class="e-alt" id="eNo">Salir sin guardar</button></div>`;
   $('eSalir').onclick = salirEntreno; $('eNo').onclick = salirEntreno;
   $('eGuardar').onclick = async () => {
     $('eGuardar').disabled = true;
@@ -674,7 +776,7 @@ async function pintarClima(cont) {
   try {
     const c = await obtenerClima(); const fo = D.fondo;
     if (!c) { cont.innerHTML = ''; return; }
-    if (c.lejos) { cont.innerHTML = `<div class="card"><h2>🌤️ Clima del domingo ${esc(fo.fecha)}</h2><div class="sub">El pronóstico aparece cuando falten 15 días o menos.</div></div>`; return; }
+    if (c.lejos) { cont.innerHTML = `<div class="card"><h2>🌤️ Clima de tu fondo · ${esc(fo.fecha)}</h2><div class="sub">El pronóstico aparece cuando falten 15 días o menos.</div></div>`; return; }
     const dd = c.j.daily, hh = c.j.hourly;
     const sal = parseInt(String(fo.salida).split(':')[0], 10) || 7;
     const fin = Math.min(23, Math.ceil(sal + (fo.horas || 3)));
@@ -688,7 +790,7 @@ async function pintarClima(cont) {
     if (lluvia >= 50) consejos.push('🌧️ Alta probabilidad de lluvia: impermeable, luces encendidas y frena antes en bajadas.');
     if (viento >= 30) consejos.push('💨 Viento fuerte: planifica la vuelta con viento a favor y ve en Z2 aunque baje la velocidad.');
     const mlh = Math.max(400, (fo.mlh || 600) + extra), bid = Math.ceil(mlh * (fo.horas || 3) / 750);
-    cont.innerHTML = `<div class="card"><h2>🌤️ Clima del domingo ${esc(fo.fecha)}</h2>
+    cont.innerHTML = `<div class="card"><h2>🌤️ Clima de tu fondo · ${esc(fo.fecha)}</h2>
       <div class="sub">${esc(CLIMA_LUGAR)} · fondo ${fmt(fo.km)} km · salida ${esc(fo.salida)} · ~${fmt(fo.horas)} h</div>
       <div class="clima-top"><div class="em">${iconoClima(dd.weather_code[0])}</div><div><div class="t">${Math.round(dd.temperature_2m_min[0])}° / ${Math.round(dd.temperature_2m_max[0])}°</div>
         <div class="vacio">Lluvia ${dd.precipitation_probability_max[0] || 0}% · viento hasta ${Math.round(dd.wind_speed_10m_max[0])} km/h</div></div></div>
