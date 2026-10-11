@@ -380,7 +380,7 @@
    CONFIGURACIÓN
    ========================================================= */
 // ⬇️ Pega entre las comillas el link de tu app (el que termina en /exec)
-const APP_URL = 'https://script.google.com/macros/s/AKfycbwVhFqcRGDbH6QJ5XE99IzZWXouHoZSpP3ANt3TTJyTOtDGm83w7QKnWJUwLT-XTpSgqw/exec';
+const APP_URL = 'PEGA_AQUI_EL_LINK_DE_TU_APP';
 // Lugar para el pronóstico del domingo (Santiago). Cámbialo si sales desde otro punto.
 const CLIMA_LAT = -33.45, CLIMA_LON = -70.66, CLIMA_LUGAR = 'Santiago';
 
@@ -1044,7 +1044,8 @@ function pintarHoy() {
   if (d.cambioHoy && d.cambioHoy.nota) h += `<div class="aviso" style="margin:0 0 14px">📌 <b>Cambio de agenda:</b> ${esc(d.cambioHoy.nota)}</div>`;
   h += tarjetaCheckin();
   if (hoyAg()) h += `<button class="mover-btn" id="btnMover">🔀 ¿No puedes hoy? Mover o cambiar la sesión</button>`;
-  if (d.fondo && (dow >= 5 || dow === 0)) h += `<div id="climaHoy"></div>`;
+  const dFondo = d.fondo && fechaFondo() ? Math.round((fechaFondo() - new Date(new Date().toDateString())) / 86400000) : 99;
+  if (dFondo >= 0 && dFondo <= 2) h += `<div id="climaHoy"></div>`;
   h += tarjetaKine('Antes');
   (d.cardio || []).forEach((c, i) => {
     const ic = {Natación: '🏊', Trote: '🏃', Bici: '🚴', Carrera: '🏁', Simulacro: '🏁', Activación: '⚡'}[c.tipo] || '🏅';
@@ -1247,7 +1248,7 @@ async function obtenerClima() {
 }
 async function pintarClima(cont) {
   if (!D.fondo) return;
-  cont.innerHTML = `<div class="card"><h2>🌤️ Clima del domingo</h2><div class="sub">Consultando pronóstico…</div></div>`;
+  cont.innerHTML = `<div class="card"><h2>🌤️ Clima de tu fondo</h2><div class="sub">Consultando pronóstico…</div></div>`;
   try {
     const c = await obtenerClima(); const fo = D.fondo;
     if (!c) { cont.innerHTML = ''; return; }
@@ -1315,7 +1316,7 @@ function pintarSemana() {
         <div class="info"><div class="nom"><span>${esc(d.dia)} ${esc(d.fecha)}</span>${s.macro ? '' : `<span class="estado e-${d.estado}">${txtEstado[d.estado]}${d.registrados ? ' · ✍️' + d.registrados : ''}</span>`}</div>
           <h4>${esc(d.sesion)}</h4>${d.detalle ? `<p>${esc(zPers(d.detalle, d.tipo === 'trote' ? 'Trote' : 'Bici'))}</p>` : ''}
           ${d.extras.map(x => `<em class="tag">${esc(x)}</em>`).join('')}
-          ${d.n === 7 && D.fondo && semSel === 0 && !s.macro ? `<em class="tag">🍌 ${esc(D.fondo.bidones)} caramayolas · ${esc(D.fondo.tipo)}</em>` : ''}
+          ${D.fondo && String(D.fondo.fecha).indexOf(d.fecha) >= 0 && !s.macro ? `<em class="tag">🍌 ${esc(D.fondo.bidones)} caramayolas · ${esc(D.fondo.tipo)}</em>` : ''}
         </div></div>`).join('');
     const w = P ? P.semanas3.find(x => x.s === s.numero) : null;
     h = `<div class="card"><h2>📅 Semana ${s.numero} de ${P ? P.semanas : 52}</h2><div class="sub">${esc(s.fase)} · ${esc(String(s.tipo).toLowerCase())}${w ? ` · ${fmt(w.horas)} h planificadas` : ''}</div>
