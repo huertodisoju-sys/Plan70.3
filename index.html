@@ -250,6 +250,7 @@
   .hoja ul{margin:6px 0 0 18px;font-size:12.5px;line-height:1.55}
   /* plan 3 años, disciplinas, yoga */
   .t-nado{background:#dff1fb}[data-tema=oscuro] .t-nado{background:#173449}
+  .t-carrera{background:#fde6df}[data-tema=oscuro] .t-carrera{background:#3d2723}
   .chips2{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
   .chips2 span{font-size:11.5px;font-weight:700;border:1.5px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card)}
   .grande-a{width:150px;height:150px}.grande-a>div{width:118px;height:118px;flex-direction:column;display:flex;align-items:center;justify-content:center}
@@ -305,6 +306,39 @@
   .zonas{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:10px}
   .z1{background:#9fb3cc}.z2{background:#2a9d8f}.z3{background:#f7c948}.z4{background:#f4a259}.z5{background:#e76f51}
   .zleg{font-size:10.5px;color:var(--slate);margin-top:4px}
+  /* check-in, mover sesiones y zonas */
+  .ck-q{margin-top:12px}.ck-q label{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:800;color:var(--slate);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+  .ck-q label span{text-transform:none;letter-spacing:0;color:var(--blue)}
+  .ck-o{display:flex;gap:6px}.ck-o button{flex:1;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:21px;transition:transform .15s,background .15s}
+  .ck-o button.on{background:var(--soft);border:2px solid var(--blue);transform:scale(1.07)}
+  .semaf{display:flex;gap:12px;align-items:center;margin-top:16px;padding:12px;border-radius:14px;background:var(--soft);animation:entra .3s ease both}
+  .luz{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px}
+  .luz.verde{background:var(--teal)}.luz.amarillo{background:var(--sun);color:#1f3a5f}.luz.rojo{background:var(--coral)}
+  .semaf b{display:block;font-size:14px}.semaf span{display:block;font-size:12px;color:var(--slate);line-height:1.45;margin-top:2px}
+  .decs{display:grid;gap:8px;margin-top:10px}
+  .dec{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:11px 12px;text-align:left;color:var(--ink)}
+  .dec b{display:block;font-size:13.5px}.dec small{display:block;font-size:11.5px;color:var(--slate);margin-top:2px;line-height:1.35}
+  .dec.rec{border:2px solid var(--blue)}.dec.rec b::after{content:' · recomendado';color:var(--blue);font-size:11px;font-weight:700}
+  .ck-mini{display:flex;align-items:center;gap:12px;cursor:pointer}.ck-mini .luz{width:40px;height:40px;font-size:13px}
+  .ck-mini b{font-size:13.5px;display:block}.ck-mini span{font-size:11.5px;color:var(--slate);display:block;margin-top:2px}
+  .mover-btn{width:100%;border:1.5px dashed var(--peach);background:var(--card);color:var(--peach);border-radius:14px;padding:12px;font-weight:800;font-size:13px;margin-bottom:14px}
+  .op{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;cursor:pointer;transition:all .15s}
+  .op.sel{border:2px solid var(--blue);background:var(--soft)}
+  .op-h{display:flex;align-items:center;gap:8px}.op-h b{font-size:14px}
+  .rbadge{margin-left:auto;font-size:10.5px;font-weight:800;color:#1f3a5f;background:var(--sun);border-radius:999px;padding:3px 8px;white-space:nowrap}
+  .op ul{list-style:none;margin:8px 0 0;font-size:12.5px}.op li{display:flex;gap:8px;padding:3px 0}
+  .op li i{font-style:normal;font-weight:800;color:var(--slate);min-width:66px;text-transform:uppercase;font-size:11px;padding-top:1px}
+  .op li span{font-weight:700;color:var(--blue)}
+  .op small{display:block;font-size:11.5px;color:var(--slate);margin-top:6px}
+  .zrow{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+  .zrow:first-of-type{border-top:none}
+  .zb{height:30px;border-radius:9px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px}
+  .zrow b{font-size:13px;display:block}.zrow span{font-size:11px;color:var(--slate);line-height:1.3}
+  .zrow strong{font-size:13.5px;white-space:nowrap}
+  .dots{display:flex;gap:4px;margin-top:12px}.dots i{flex:1;height:26px;border-radius:7px;background:var(--line)}
+  .dots i.verde{background:var(--teal)}.dots i.amarillo{background:var(--sun)}.dots i.rojo{background:var(--coral)}
+  .dia.movido{border-style:dashed;border-color:var(--peach)}
+  .zlinea{font-size:11.5px;font-weight:700;color:var(--teal);margin-top:8px}
   .cargando{text-align:center;padding:60px 0;color:var(--slate);font-weight:600}
   @media(min-width:640px){.grid{grid-template-columns:repeat(4,1fr)}.stats{grid-template-columns:repeat(6,1fr)}.insignias{grid-template-columns:repeat(6,1fr)}}
 </style>
@@ -346,7 +380,7 @@
    CONFIGURACIÓN
    ========================================================= */
 // ⬇️ Pega entre las comillas el link de tu app (el que termina en /exec)
-const APP_URL = 'https://script.google.com/macros/s/AKfycbwVhFqcRGDbH6QJ5XE99IzZWXouHoZSpP3ANt3TTJyTOtDGm83w7QKnWJUwLT-XTpSgqw/exec';
+const APP_URL = 'PEGA_AQUI_EL_LINK_DE_TU_APP';
 // Lugar para el pronóstico del domingo (Santiago). Cámbialo si sales desde otro punto.
 const CLIMA_LAT = -33.45, CLIMA_LON = -70.66, CLIMA_LUGAR = 'Santiago';
 
@@ -645,7 +679,7 @@ function pasosDe(f, esYoga) {
   return out;
 }
 function tarjetaComp() {
-  const c = D.complemento; if (!c || !c.filas || !c.filas.length) return '';
+  const c = D.complemento; if (!c || !c.filas || !c.filas.length || c._oculto) return '';
   const esYoga = c.tipo === 'yoga', Y = D.yoga || {};
   const hechos = c.filas.filter(f => leer(claveComp(c.clave, f.n)) === '1').length;
   const minEst = esYoga ? Math.round(c.filas.reduce((a, f) => a + pasosDe(f, true).filter(p => p.tipo === 'trabajo').reduce((b, p) => b + (p.seg || 30), 0), 0) / 60) : 0;
@@ -768,6 +802,226 @@ function finGuiado() {
 }
 
 /* =========================================================
+   CHECK-IN DIARIO (semáforo) · VERSIÓN CORTA
+   ========================================================= */
+const isoHoy = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const CK = [
+  ['sueno', '😴 Sueño', ['Pésimo', 'Malo', 'Regular', 'Bueno', 'Excelente'], ['😫', '😕', '😐', '🙂', '😁']],
+  ['energia', '⚡ Energía', ['Muy baja', 'Baja', 'Normal', 'Buena', 'A tope'], ['🪫', '😮‍💨', '😐', '💪', '🚀']],
+  ['dolor', '🩹 Dolor muscular o articular', ['Nada', 'Leve', 'Moderado', 'Fuerte', 'Muy fuerte'], ['✅', '🙂', '😬', '😣', '🚫']],
+  ['estres', '🧠 Estrés', ['Muy bajo', 'Bajo', 'Normal', 'Alto', 'Muy alto'], ['😌', '🙂', '😐', '😟', '🤯']]
+];
+const SEMAF = { verde: '🟢 Listo para entrenar', amarillo: '🟡 Entrena con freno de mano', rojo: '🔴 Hoy toca cuidarse' };
+const DEC = {
+  completa: ['✅ Hacerla completa', 'Tal como está en el plan'],
+  corta: ['✂️ Versión corta', 'Fuerza: 1 serie menos y RPE −1, sin pliometría · Cardio: ~2/3 del tiempo, todo en Z2'],
+  mover: ['🔀 Mover la sesión', 'Te propongo el mejor día sin juntar días duros']
+};
+let ck = {}, ckEditar = false;
+function puntajeCk(c) {   // misma regla que el servidor (Agenda.gs)
+  const p = Math.round(((c.sueno - 1) + (c.energia - 1) + (5 - c.dolor) + (5 - c.estres)) / 16 * 100);
+  let s = 'verde';
+  if (p < 35 || c.dolor >= 4 || (c.sueno === 1 && c.energia <= 2)) s = 'rojo';
+  else if (p < 65 || c.dolor === 3 || c.sueno <= 2 || c.energia <= 2) s = 'amarillo';
+  return { puntaje: p, semaforo: s };
+}
+const hoyAg = () => (D.agenda || []).find(a => a.k === 0) || null;
+function recomendacion(r, c) {
+  const a = hoyAg(), carga = a ? a.carga : 1;
+  const dolor = c.dolor >= 4 ? 'Con dolor fuerte no cargues esa zona; si dura más de 3 días, es punzante o está en una articulación, consulta a un profesional. '
+              : c.dolor === 3 ? 'Ojo con el dolor: si aumenta al entrenar, para. ' : '';
+  if (carga === 0) return { titulo: SEMAF[r.semaforo], texto: dolor + 'Hoy es día suave o de descanso: aprovecha de recuperar.', rec: 'completa', ops: ['completa'] };
+  if (r.semaforo === 'verde') return { titulo: SEMAF.verde, texto: 'Haz la sesión completa, como está planificada.', rec: 'completa', ops: ['completa', 'corta', 'mover'] };
+  if (r.semaforo === 'amarillo') return { titulo: SEMAF.amarillo, texto: dolor + (carga >= 2 ? 'Es una sesión exigente: te sugiero la versión corta, con menos volumen e intensidad.' : 'La sesión es moderada: hazla sin apurar, o elige la versión corta.'), rec: carga >= 2 ? 'corta' : 'completa', ops: ['completa', 'corta', 'mover'] };
+  return { titulo: SEMAF.rojo, texto: dolor + (carga >= 2 ? 'Te sugiero mover la sesión a otro día y hoy solo movilidad suave o descanso.' : 'Haz la versión corta o muévela si no te sientes bien.'), rec: carga >= 2 ? 'mover' : 'corta', ops: ['mover', 'corta', 'completa'] };
+}
+function tarjetaCheckin() {
+  if (!D.checkin) return '';
+  const h = D.checkin.hoy;
+  if (h && !ckEditar) {
+    return `<div class="card ck-card"><div class="ck-mini" id="ckEditar"><div class="luz ${esc(h.semaforo)}">${h.puntaje}</div>
+      <div style="flex:1;min-width:0"><b>${SEMAF[h.semaforo] || 'Check-in de hoy'}</b><span>${DEC[h.decision] ? DEC[h.decision][0] : 'Sin decisión'} · tocar para cambiar</span></div></div></div>`;
+  }
+  if (!h && !ckEditar && leer('ckNo|' + new Date().toDateString()) === '1') return `<button class="mover-btn" id="ckAbrir">🚦 Hacer el check-in de hoy (20 segundos)</button>`;
+  if (h && !Object.keys(ck).length) ck = { sueno: h.sueno, energia: h.energia, dolor: h.dolor, estres: h.estres };
+  const filas = CK.map(q => `<div class="ck-q"><label>${q[1]}<span id="ckL-${q[0]}">${ck[q[0]] ? q[2][ck[q[0]] - 1] : ''}</span></label>
+    <div class="ck-o" data-q="${q[0]}">${q[3].map((e, i) => `<button type="button" data-v="${i + 1}" class="${ck[q[0]] === i + 1 ? 'on' : ''}" aria-label="${q[2][i]}">${e}</button>`).join('')}</div></div>`).join('');
+  return `<div class="card" data-id="ck"><h2>🚦 ¿Cómo amaneciste?</h2><div class="sub">4 toques y te digo si hacer la sesión completa, en versión corta o moverla.</div>
+    ${filas}<div id="ckRes"></div><button class="secundario" id="ckNo">${h ? 'Cancelar' : 'Ahora no'}</button></div>`;
+}
+function pintarCkRes() {
+  const el = $('ckRes'); if (!el) return;
+  if (CK.some(q => !ck[q[0]])) { el.innerHTML = ''; alto(); return; }
+  const r = puntajeCk(ck), R = recomendacion(r, ck);
+  el.innerHTML = `<div class="semaf"><div class="luz ${r.semaforo}">${r.puntaje}</div><div><b>${esc(R.titulo)}</b><span>${esc(R.texto)}</span></div></div>
+    <div class="decs">${R.ops.map(k => `<button class="dec ${k === R.rec ? 'rec' : ''}" data-d="${k}"><b>${DEC[k][0]}</b><small>${esc(DEC[k][1])}</small></button>`).join('')}</div>`;
+  el.querySelectorAll('.dec').forEach(b => b.onclick = () => guardarCheckin(b.dataset.d, r));
+  alto();
+}
+function activarCheckin(cont) {
+  cont.querySelectorAll('.ck-o').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const q = g.dataset.q, v = +b.dataset.v; ck[q] = v;
+    g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    const def = CK.find(x => x[0] === q); $('ckL-' + q).textContent = def[2][v - 1];
+    pintarCkRes();
+  }));
+  if ($('ckEditar')) $('ckEditar').onclick = () => { ckEditar = true; ck = {}; pintarHoy(); };
+  if ($('ckAbrir')) $('ckAbrir').onclick = () => { borrar('ckNo|' + new Date().toDateString()); ckEditar = true; pintarHoy(); };
+  if ($('ckNo')) $('ckNo').onclick = () => { if (!D.checkin.hoy) guardar('ckNo|' + new Date().toDateString(), '1'); ckEditar = false; pintarHoy(); };
+  pintarCkRes();
+}
+async function guardarCheckin(decision, r) {
+  const datos = Object.assign({ accion: 'checkin', fecha: isoHoy(), decision, sesion: D.sesion || '' }, ck);
+  const ok = await enviar(datos);
+  if (!ok) return;
+  D.checkin.hoy = Object.assign({ f: isoHoy(), hace: 0, decision }, ck, r);
+  ckEditar = false; aplicarCorta(); pintarHoy();
+  if (decision === 'mover') abrirMover();
+  else if (decision === 'corta') toast('✂️ Versión corta aplicada a la sesión de hoy', 3000);
+}
+// Versión corta: menos series, RPE −1, sin pliometría; cardio a ~2/3 y todo en Z2
+function aplicarCorta() {
+  if (!D || D._corta || !D.checkin || !D.checkin.hoy || D.checkin.hoy.decision !== 'corta') return;
+  D._corta = true;
+  (D.ejercicios || []).forEach(e => {
+    const n = parseInt(e.series, 10);
+    if (n >= 3) { e.series = (n - 1) + ' (de ' + n + ')'; e.nSeries = n - 1; }
+    if (e.rpe) e.rpe = String(e.rpe).replace(/\d+/g, x => Math.max(4, +x - 1));
+  });
+  (D.cardio || []).forEach(c => { c.corta = true; });
+  if (D.complemento && D.complemento.tipo === 'plio') D.complemento._oculto = true;
+}
+
+/* =========================================================
+   ZONAS PERSONALES
+   ========================================================= */
+function zPers(txt, tipo) {   // cambia "Z2 115–134 lpm" del plan por tus zonas
+  const Z = D.zonas; if (!Z || !txt) return txt;
+  const L = tipo === 'Trote' ? Z.troteFc : Z.bici;
+  return String(txt).replace(/Z([1-5])(\s+)(\d{2,3})\s*[–-]\s*(\d{2,3})/g, (m, z, sp) => { const x = L[+z - 1]; return x ? `Z${z}${sp}${x.min}–${x.max}` : m; });
+}
+function zLinea(tipo) {
+  const Z = D.zonas; if (!Z) return '';
+  if (tipo === 'Bici') return `Tus zonas: Z2 ${Z.bici[1].min}–${Z.bici[1].max} · Z3 ${Z.bici[2].min}–${Z.bici[2].max} lpm`;
+  if (tipo === 'Trote') return `Tus zonas: Z2 ${Z.troteFc[1].min}–${Z.troteFc[1].max} lpm${Z.ritmo.length ? ' · ' + Z.ritmo[1].rango + ' /km' : ''}`;
+  if (tipo === 'Natación') return Z.css ? `Tu CSS: ${Z.css}/100 m · Z2 ${Z.nado[1].rango}` : 'Tu ritmo de referencia (CSS) se calcula con el test de 400 m';
+  return '';
+}
+let zSel = 'bici';
+const zr = (z, n, uso, v, v2) => `<div class="zrow"><div class="zb z${z}">Z${z}</div><div style="min-width:0"><b>${esc(n)}</b><span>${esc(uso)}</span></div>
+  <div style="text-align:right"><strong>${esc(v)}</strong>${v2 ? `<span style="display:block">${esc(v2)}</span>` : ''}</div></div>`;
+function tarjetaZonas() {
+  const Z = D.zonas; if (!Z) return '';
+  let filas = '', fuente = '';
+  if (zSel === 'bici') {
+    filas = Z.bici.map((z, i) => zr(z.z, z.nombre, Z.uso[i], z.min + '–' + z.max + ' lpm')).join('');
+    fuente = Z.lthrB ? `FC umbral ${Z.lthrB} lpm · ${Z.lthrBF}` : `Calculadas con tu FC máxima (${Z.fcMax} lpm · ${Z.fcMaxF}). Aún no hay test de umbral.`;
+  } else if (zSel === 'trote') {
+    filas = Z.troteFc.map((z, i) => zr(z.z, z.nombre, Z.uso[i], z.min + '–' + z.max + ' lpm', Z.ritmo[i] ? Z.ritmo[i].rango + ' /km' : '')).join('');
+    fuente = Z.lthrT ? `FC umbral ${Z.lthrT} lpm${Z.umbral ? ' · ritmo umbral ' + Z.umbral + '/km' : ''} · ${Z.t5F || Z.lthrTF}` : `Calculadas con tu FC máxima (${Z.fcMax} lpm). Los ritmos aparecen con tu primer test de trote.`;
+  } else {
+    filas = Z.nado.length ? Z.nado.map((z, i) => zr(z.z, z.nombre, ['Calentar y soltar', 'Base aeróbica, la mayoría de los metros', 'Ritmo sostenido de carrera', 'Series a tu ritmo umbral', 'Series cortas y rápidas'][i], z.rango + ' /100 m')).join('')
+      : `<div class="vacio" style="padding:8px 0">Tu ritmo de referencia (CSS) se calcula con el test de 400 m. La natación parte en la semana 53 (oct 2027).</div>`;
+    fuente = Z.css ? `CSS ${Z.css}/100 m · ${Z.t400F}` : '';
+  }
+  return `<div class="card"><h2>❤️ Tus zonas${Z.personal ? '<span class="tag t-Test" style="margin:0 0 0 auto">Personalizadas</span>' : ''}</h2>
+    <div class="sub">Se recalculan solas con cada test (nómbralo "Test" en Strava). Hoy y Semana ya usan estos valores.</div>
+    <div class="seg" id="segZ">${[['bici', '🚴 Bici'], ['trote', '🏃 Trote'], ['nado', '🏊 Natación']].map(t => `<button data-z="${t[0]}" class="${zSel === t[0] ? 'on' : ''}">${t[1]}</button>`).join('')}</div>
+    ${filas}${fuente ? `<div class="ayuda" style="margin-top:8px">${esc(fuente)}</div>` : ''}
+    ${zSel === 'bici' && !Z.lthrB ? `<div class="aviso"><b>¿Zonas de bici más precisas ya?</b> Test de umbral: 15 min de calentamiento y 30 min al máximo esfuerzo que puedas sostener parejo. La FC media de los últimos 20 min es tu umbral: anótala en la hoja Zonas (celda B5).</div>` : ''}
+    ${Z.proximo ? `<div class="aviso"><b>Próximo test del plan:</b> ${esc(Z.proximo.que)} · ${esc(Z.proximo.fecha)} (semana ${Z.proximo.s})</div>` : ''}</div>`;
+}
+function tarjetaBienestar() {
+  const C = D.checkin; if (!C) return '';
+  const dias = []; for (let k = 13; k >= 0; k--) dias.push(C.dias.find(d => d.hace === k) || null);
+  const u7 = C.dias.filter(d => d.hace < 7);
+  const pr = k => u7.length ? (u7.reduce((a, d) => a + (d[k] || 0), 0) / u7.length).toFixed(1).replace('.', ',') : '—';
+  let seguidos = 0; for (let k = 0; k < 14; k++) { const x = C.dias.find(d => d.hace === k); if (x && x.semaforo !== 'verde') seguidos++; else if (x || k > 0) break; }
+  return `<div class="card"><h2>🚦 Cómo vienes · 14 días</h2><div class="sub">Tu check-in de cada mañana. ${C.dias.length ? '' : 'Aún no hay registros: hazlo en Hoy.'}</div>
+    <div class="dots">${dias.map(x => `<i class="${x ? x.semaforo : ''}" title="${x ? esc(x.f) + ' · ' + x.puntaje : 'sin registro'}"></i>`).join('')}</div>
+    <div class="anios"><span>hace 2 semanas</span><span>hoy</span></div>
+    ${seguidos >= 3 ? `<div class="aviso"><b>${seguidos} días seguidos en amarillo o rojo.</b> Prioriza dormir y considera hacer esta semana más liviana (versión corta en las sesiones duras).</div>` : ''}
+    <div class="grid" style="margin-top:10px"><div class="kpi"><small>Sueño · 7 días</small><div>${pr('sueno')}</div><span>de 5</span></div>
+      <div class="kpi"><small>Energía</small><div>${pr('energia')}</div><span>de 5</span></div>
+      <div class="kpi"><small>Dolor</small><div>${pr('dolor')}</div><span>1 = nada</span></div>
+      <div class="kpi"><small>Estrés</small><div>${pr('estres')}</div><span>1 = muy bajo</span></div></div></div>`;
+}
+
+/* =========================================================
+   MOVER / CAMBIAR SESIONES
+   ========================================================= */
+// días duros seguidos que crea el cambio (solo cuenta pares donde algún día cambió)
+const durosSeguidos = (X, A) => { let n = 0; const cambio = i => !A || X[i].nombre !== A[i].nombre || X[i].d !== A[i].d;
+  for (let i = 1; i < X.length; i++) if (X[i].carga >= 2 && X[i - 1].carga >= 2 && (cambio(i) || cambio(i - 1))) n++; return n; };
+function opcionesMover(A, t, sem) {
+  const H = A[t], copia = () => A.map(a => Object.assign({}, a));
+  const enHoy = c => sem === 'rojo' ? (c >= 2 ? 4 : c >= 1 ? 1.5 : 0) : sem === 'amarillo' ? (c >= 2 ? 1.5 : 0) : 0;
+  const pon = (X, i, src) => { X[i] = Object.assign({}, src, { iso: A[i].iso, dia: A[i].dia, fecha: A[i].fecha, k: A[i].k }); };
+  const cambios = [], otras = [];
+  // 1) intercambiar con otro día de los próximos 6
+  for (let j = t + 1; j < A.length && j <= t + 6; j++) {
+    const B = A[j];
+    if (B.registrado || B.nombre === H.nombre) continue;
+    const X = copia(); pon(X, t, B); pon(X, j, H);
+    cambios.push({ titulo: `Cambiar con el ${B.dia} ${B.fecha}`, X, score: durosSeguidos(X, A) * 2 + enHoy(B.carga) + (j - t) * 0.25,
+      asig: [{ fecha: H.iso, s: B.s, d: B.d, nota: `${B.nombre} (cambiada con el ${B.dia} ${B.fecha})` }, { fecha: B.iso, s: H.s, d: H.d, nota: `${H.nombre} (cambiada desde el ${H.dia} ${H.fecha})` }], omitir: [] });
+  }
+  cambios.sort((a, b) => a.score - b.score);
+  if (H.carga > 0) {
+    // 2) correr todo un día: hoy libre y cada sesión pasa al día siguiente, hasta un día suave que se omite
+    let j = t + 1; while (j < A.length && j <= t + 3 && A[j].carga >= 1) j++;
+    if (j < A.length && j <= t + 3) {
+      const X = copia(); X[t] = Object.assign({}, H, { nombre: 'Libre (sesión movida)', carga: 0, d: 0 });
+      for (let i = t + 1; i <= j; i++) pon(X, i, A[i - 1]);
+      const drop = A[j];
+      const asig = [{ fecha: H.iso, s: H.s, d: 0, nota: `${H.nombre} pasa al ${A[t + 1].dia} ${A[t + 1].fecha}` }];
+      for (let i = t + 1; i <= j; i++) asig.push({ fecha: A[i].iso, s: A[i - 1].s, d: A[i - 1].d, nota: `${A[i - 1].nombre} (corrida desde el ${A[i - 1].dia} ${A[i - 1].fecha})` });
+      otras.push({ titulo: 'Correr todo un día', X, drop, score: durosSeguidos(X, A) * 2 + (drop.carga === 0 ? 1.5 : 0.8) + (j - t - 1) * 0.3,
+        asig, omitir: drop.d ? [drop.s + '-' + drop.d] : [] });
+    }
+    // 3) saltarla
+    const X = copia(); X[t] = Object.assign({}, H, { nombre: 'Descanso', carga: 0, d: 0 });
+    otras.push({ titulo: 'Saltarla y descansar hoy', X, saltar: true, score: durosSeguidos(X, A) * 2 + H.carga * 2.2 + 0.5 - (sem === 'rojo' ? 2.5 : 0),
+      asig: [{ fecha: H.iso, s: H.s, d: 0, nota: `${H.nombre}: no se hizo (descanso)` }], omitir: H.d ? [H.s + '-' + H.d] : [] });
+  }
+  return cambios.slice(0, 2).concat(otras).sort((a, b) => a.score - b.score);
+}
+let opSel = 0, opsMover = [];
+function abrirMover() {
+  const A = D.agenda || [], t = A.findIndex(a => a.k === 0);
+  if (t < 0) { toast('No encontré tu agenda. Actualiza con ↻'); return; }
+  const H = A[t], sem = D.checkin && D.checkin.hoy ? D.checkin.hoy.semaforo : 'verde';
+  opsMover = opcionesMover(A, t, sem); opSel = 0;
+  const hayCambios = A.some(a => a.k >= 0 && a.movido);
+  const op = (o, i) => {
+    const lineas = o.X.map((x, k) => ({ x, a: A[k] })).filter(p => p.a.k >= 0 && p.a.k <= 6 && (p.x.nombre !== p.a.nombre || p.x.d !== p.a.d));
+    const duros = durosSeguidos(o.X, A);
+    return `<div class="op ${i === opSel ? 'sel' : ''}" data-i="${i}">
+      <div class="op-h"><b>${esc(o.titulo)}</b>${i === 0 ? '<span class="rbadge">⭐ Recomendado</span>' : ''}</div>
+      <ul>${lineas.map(p => `<li class="cambia"><i>${esc(p.a.dia)} ${esc(p.a.fecha)}</i><span>${esc(p.x.nombre)}</span></li>`).join('')}</ul>
+      <small>${o.drop ? `Se omite: ${esc(o.drop.nombre)} (${esc(o.drop.dia)}) · ` : ''}${o.saltar ? 'La sesión queda como no hecha · ' : ''}${duros ? '⚠️ Quedan días duros seguidos' : '✓ Sin días duros seguidos'}</small></div>`;
+  };
+  abrirHoja(`<h3>🔀 Mover la sesión de hoy</h3><div class="sub">Hoy: <b>${esc(H.nombre)}</b>${sem !== 'verde' ? ` · check-in ${sem}` : ''}. Elige una opción; la planilla se ajusta sola (hoja Cambios).</div>
+    ${opsMover.length ? opsMover.map(op).join('') : '<div class="vacio">No hay opciones para mover hoy.</div>'}
+    ${opsMover.length ? `<button class="primario" id="mOk">Confirmar cambio</button>` : ''}
+    ${hayCambios ? `<button class="secundario" id="mRest">↩️ Volver al plan original desde hoy</button>` : ''}
+    <button class="secundario" onclick="cerrarHoja()">Cancelar</button>`);
+  $('hojaC').querySelectorAll('.op').forEach(el => el.onclick = () => {
+    opSel = +el.dataset.i; $('hojaC').querySelectorAll('.op').forEach(x => x.classList.toggle('sel', x === el));
+  });
+  if ($('mOk')) $('mOk').onclick = async () => {
+    const o = opsMover[opSel]; $('mOk').disabled = true;
+    const ok = await enviar({ accion: 'mover', asignaciones: o.asig, omitir: o.omitir });
+    if (ok) { cerrarHoja(); toast('🔀 Listo: ' + o.titulo.toLowerCase(), 3000); } else $('mOk').disabled = false;
+  };
+  if ($('mRest')) $('mRest').onclick = async () => {
+    $('mRest').disabled = true;
+    const ok = await enviar({ accion: 'restaurar', desde: isoHoy() });
+    if (ok) { cerrarHoja(); toast('↩️ Plan original restaurado desde hoy', 3000); } else $('mRest').disabled = false;
+  };
+}
+
+/* =========================================================
    VISTA HOY
    ========================================================= */
 const claveHecho = n => 'hecho|' + new Date().toDateString() + '|' + n;
@@ -787,8 +1041,23 @@ function pintarHoy() {
   h += `<div class="acciones">
     ${d.ejercicios.length ? `<button class="accion a1" id="btnEntreno"><b>▶ Modo entrenamiento</b><small>${d.ejercicios.length} ejercicios, uno a la vez</small></button>` : ''}
     <button class="accion a2 ${d.ejercicios.length ? '' : 'solo'}" id="btnPeso"><b>⚖️ ${d.pesoHoy ? fmt(d.pesoHoy) + ' kg' : 'Peso de hoy'}</b><small>${d.pesoHoy ? 'Registrado hoy · tocar para cambiar' : 'Anótalo en 5 segundos'}</small></button></div>`;
+  if (d.cambioHoy && d.cambioHoy.nota) h += `<div class="aviso" style="margin:0 0 14px">📌 <b>Cambio de agenda:</b> ${esc(d.cambioHoy.nota)}</div>`;
+  h += tarjetaCheckin();
+  if (hoyAg()) h += `<button class="mover-btn" id="btnMover">🔀 ¿No puedes hoy? Mover o cambiar la sesión</button>`;
   if (d.fondo && (dow >= 5 || dow === 0)) h += `<div id="climaHoy"></div>`;
   h += tarjetaKine('Antes');
+  (d.cardio || []).forEach((c, i) => {
+    const ic = {Natación: '🏊', Trote: '🏃', Bici: '🚴', Carrera: '🏁', Simulacro: '🏁', Activación: '⚡'}[c.tipo] || '🏅';
+    const st = (t, v) => v ? `<div class="stat"><small>${t}</small><strong>${esc(v)}</strong></div>` : '';
+    const zl = zLinea(c.tipo);
+    h += tarjeta('cardio' + i, ic + ' ' + esc(zPers(c.titulo, c.tipo)), d.sesion,
+      `${c.corta ? `<div class="aviso" style="margin:0 0 10px"><b>✂️ Versión corta:</b> haz ~2/3 del tiempo o de la distancia, todo en Z2 y sin bloques de intensidad.</div>` : ''}
+       <div class="stats">${st('Duración', c.duracion)}${st('Volumen', c.volumen)}${st('Zona', zPers(c.zona, c.tipo))}${st('Esfuerzo (RPE)', c.esfuerzo)}</div>
+       ${c.herramienta && c.herramienta !== '—' ? `<div class="herr">🧰 ${esc(c.herramienta)}</div>` : ''}
+       ${zl ? `<div class="zlinea">❤️ ${esc(zl)}</div>` : ''}
+       ${c.estructura ? `<div class="aviso"><b>${c.tipo === 'Bici' ? 'Zonas y claves' : 'Estructura'}:</b> ${esc(zPers(c.estructura, c.tipo))}</div>` : ''}
+       <div class="ayuda" style="margin-top:8px">Se registra solo desde Strava: al terminar, sincroniza tu reloj o ciclocomputador.</div>`);
+  });
   if (d.ejercicios.length) {
     const ej = d.ejercicios.map((e, i) => {
       const hecho = estaHecho(e);
@@ -817,7 +1086,7 @@ function pintarHoy() {
         </div></div>`;
     }).join('');
     h += tarjeta('ej', '💪 ' + esc(d.sesion || 'Sesión de hoy'), `Semana ${d.semana} · ${d.fase} · ${d.tipo}`,
-      `<div class="avance"><span id="cuenta"></span><div class="barra"><i id="barraEj" style="background:var(--teal)"></i></div></div>${ej}
+      `${d._corta ? `<div class="aviso" style="margin:0 0 10px"><b>✂️ Versión corta:</b> 1 serie menos por ejercicio y RPE 1 punto más bajo. Hoy sin pliometría.</div>` : ''}<div class="avance"><span id="cuenta"></span><div class="barra"><i id="barraEj" style="background:var(--teal)"></i></div></div>${ej}
        <div class="sub" style="margin-top:12px">Toca <b>Descanso</b> para el temporizador · <b>Registrar</b> guarda kg, reps y RPE en la planilla.</div>`);
   } else if (d.sesion) {
     h += `<div class="card"><h2>${/descanso/i.test(d.sesion) ? '😌' : '🚴'} ${esc(d.sesion)}</h2><div class="sub">Hoy no hay fuerza en casa.</div></div>`;
@@ -828,7 +1097,8 @@ function pintarHoy() {
   h += tarjeta('com', '🍽️ Tus comidas de hoy', d.comidas.resumen, lista(d.comidas.filas, 'hora', 'comida', 'que', 'dato'));
   h += tarjetaKine('Después');
   $('v0').innerHTML = h;
-  activarKine($('v0')); activarComp($('v0'));
+  activarKine($('v0')); activarComp($('v0')); activarCheckin($('v0'));
+  if ($('btnMover')) $('btnMover').onclick = abrirMover;
   contarHechos();
   if ($('btnEntreno')) $('btnEntreno').onclick = abrirEntreno;
   $('btnPeso').onclick = abrirPeso;
@@ -1008,7 +1278,7 @@ async function pintarClima(cont) {
 /* =========================================================
    VISTA SEMANA (+ plan 3 años)
    ========================================================= */
-const icoTipo = {fuerza: '💪', core: '🧘‍♂️', bici: '🚴', trote: '🏃', descanso: '😌', nado: '🏊'};
+const icoTipo = {fuerza: '💪', core: '🧘‍♂️', bici: '🚴', trote: '🏃', descanso: '😌', nado: '🏊', carrera: '🏁'};
 const txtEstado = {hecho: 'Hecho', hoy: 'Hoy', pendiente: 'Pendiente', omitido: 'No hecho'};
 let bloqueAbierto = null;
 function pintarSemana() {
@@ -1040,10 +1310,10 @@ function pintarSemana() {
   } else {
     if (!sv.length) { $('v1').innerHTML = `<div class="card"><h2>📅 Semana</h2>${segs}<div class="sub">No encontré la semana en el Programa.</div></div>`; activarSegSem(); return; }
     const s = sv[Math.min(semSel, sv.length - 1)];
-    const dias = s.dias.map(d => `<div class="dia ${d.estado === 'hoy' ? 'hoy' : ''} ${d.estado === 'hecho' ? 'pasado' : ''}">
+    const dias = s.dias.map(d => `<div class="dia ${d.estado === 'hoy' ? 'hoy' : ''} ${d.estado === 'hecho' ? 'pasado' : ''} ${d.movido ? 'movido' : ''}">
         <div class="ico t-${d.tipo}">${icoTipo[d.tipo] || '•'}</div>
         <div class="info"><div class="nom"><span>${esc(d.dia)} ${esc(d.fecha)}</span>${s.macro ? '' : `<span class="estado e-${d.estado}">${txtEstado[d.estado]}${d.registrados ? ' · ✍️' + d.registrados : ''}</span>`}</div>
-          <h4>${esc(d.sesion)}</h4>${d.detalle ? `<p>${esc(d.detalle)}</p>` : ''}
+          <h4>${esc(d.sesion)}</h4>${d.detalle ? `<p>${esc(zPers(d.detalle, d.tipo === 'trote' ? 'Trote' : 'Bici'))}</p>` : ''}
           ${d.extras.map(x => `<em class="tag">${esc(x)}</em>`).join('')}
           ${d.n === 7 && D.fondo && semSel === 0 && !s.macro ? `<em class="tag">🍌 ${esc(D.fondo.bidones)} caramayolas · ${esc(D.fondo.tipo)}</em>` : ''}
         </div></div>`).join('');
@@ -1053,7 +1323,7 @@ function pintarSemana() {
         ${w && w.hito ? `<div class="aviso" style="margin:0 0 6px"><b>Hito de la semana:</b> ${esc(w.hito)}</div>` : ''}
         ${s.macro ? `<div class="aviso" style="margin:0 0 6px">Semana tipo del bloque. El detalle día a día se arma al comenzar el bloque, con tus datos reales.</div>` : ''}
         ${dias}
-        <div class="sub" style="margin-top:12px">🧘 El yoga del sábado y domingo es para hacerlo con Sonia. La rutina exacta aparece en Hoy ese día.</div></div>
+        <div class="sub" style="margin-top:12px">🧘 El yoga del sábado y domingo es para hacerlo con Sonia. La rutina exacta aparece en Hoy ese día.${semSel === 0 ? ' 🔀 Para mover una sesión, usa el botón en Hoy.' : ''}</div></div>
       ${semSel === 0 && D.fondo ? '<div id="climaSem"></div>' : ''}`;
     $('v1').innerHTML = h;
     if ($('climaSem')) pintarClima($('climaSem'));
@@ -1080,6 +1350,7 @@ function pintarProgreso() {
       <div class="chips2"><span>⏳ ${fmt(P.diasCarrera)} días para Pucón</span><span style="border-color:${colAdh}">✅ Cumplimiento ${adh}%</span></div>
       <div style="text-align:left;margin-top:12px">${barD('💪', 'Fuerza', P.disc.fuerza)}${barD('🚴', 'Bici', P.disc.bici)}${barD('🏃', 'Trote', P.disc.trote)}${barD('🏊', 'Natación', P.disc.nado)}</div>
       <div class="ayuda" style="text-align:left">El anillo avanza con cada sesión que completas de las ${fmt(P.total)} del plan. El cumplimiento compara lo hecho con lo planificado hasta hoy (fuerza según el Programa; bici, trote y natación según Strava).</div></div>`;
+    h += tarjetaBienestar() + tarjetaZonas();
     // línea de tiempo
     const tot = P.semanas, cur = P.semActual;
     const b0 = bloqueSel === null ? P.bloques.findIndex(b => cur >= b.s0 && cur <= b.s1) : bloqueSel;
@@ -1136,6 +1407,7 @@ function pintarProgreso() {
   $('v2').querySelectorAll('.linea i').forEach(x => x.onclick = () => { bloqueSel = +x.dataset.i; pintarProgreso(); animarProgreso(true); });
   if ($('verHitos')) $('verHitos').onclick = () => { verHitos = !verHitos; pintarProgreso(); animarProgreso(true); };
   $('pesoBtn2').onclick = abrirPeso;
+  if ($('segZ')) $('segZ').querySelectorAll('button').forEach(b => b.onclick = () => { zSel = b.dataset.z; pintarProgreso(); animarProgreso(true); });
   if (typeof Chart !== 'undefined') {
     graficos.push(new Chart($('g-kcal'), base('bar', d.nutricion.dias14.map(x => x.etiqueta), [
       { label: 'Kcal', data: d.nutricion.dias14.map(x => x.kcal), backgroundColor: css('--cel'), borderRadius: 6, order: 2 },
@@ -1315,8 +1587,9 @@ function pintarTodo() {
 }
 function listo(d) {
   D = d; $('refrescar').classList.remove('gira');
+  ck = {}; aplicarCorta();
   $('fecha').textContent = d.fecha.charAt(0).toUpperCase() + d.fecha.slice(1);
-  $('chips').innerHTML = [d.semana ? 'Semana ' + d.semana + ' de 52' : '', d.fase, d.tipo, 'Actualizado ' + d.actualizado]
+  $('chips').innerHTML = [d.semana ? 'Semana ' + d.semana + ' de ' + (d.plan3 ? d.plan3.semanas : 52) : '', d.fase, d.tipo, 'Actualizado ' + d.actualizado]
     .filter(Boolean).map(x => `<span class="chip">${esc(x)}</span>`).join('');
   pintarTodo();
 }
