@@ -338,6 +338,9 @@
   .dots{display:flex;gap:4px;margin-top:12px}.dots i{flex:1;height:26px;border-radius:7px;background:var(--line)}
   .dots i.verde{background:var(--teal)}.dots i.amarillo{background:var(--sun)}.dots i.rojo{background:var(--coral)}
   .dia.movido{border-style:dashed;border-color:var(--peach)}
+  .orden{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--slate);background:var(--soft);border-radius:12px;padding:8px 10px;margin-bottom:10px}
+  .orden span{width:18px;height:18px;border-radius:50%;background:var(--peach);color:#fff;display:inline-grid;place-items:center;font-size:10.5px;font-weight:800}
+  .orden i{font-style:normal;color:var(--line)}
   .zlinea{font-size:11.5px;font-weight:700;color:var(--teal);margin-top:8px}
   .cargando{text-align:center;padding:60px 0;color:var(--slate);font-weight:600}
   @media(min-width:640px){.grid{grid-template-columns:repeat(4,1fr)}.stats{grid-template-columns:repeat(6,1fr)}.insignias{grid-template-columns:repeat(6,1fr)}}
@@ -380,7 +383,7 @@
    CONFIGURACIÓN
    ========================================================= */
 // ⬇️ Pega entre las comillas el link de tu app (el que termina en /exec)
-const APP_URL = 'https://script.google.com/macros/s/AKfycbwVhFqcRGDbH6QJ5XE99IzZWXouHoZSpP3ANt3TTJyTOtDGm83w7QKnWJUwLT-XTpSgqw/exec';
+const APP_URL = 'PEGA_AQUI_EL_LINK_DE_TU_APP';
 // Lugar para el pronóstico del domingo (Santiago). Cámbialo si sales desde otro punto.
 const CLIMA_LAT = -33.45, CLIMA_LON = -70.66, CLIMA_LUGAR = 'Santiago';
 
@@ -694,7 +697,7 @@ function tarjetaComp() {
   }).join('');
   const pie = esYoga ? (Y.hoy ? `<span class="guardado">✓ Sesión de hoy guardada en la planilla</span>` : `<button class="btn2" id="guardarYoga" style="margin-left:0">💾 Guardar sesión de yoga</button>`) : '';
   return tarjeta('comp', esc(c.titulo), c.resumen,
-    `${esYoga ? `<div class="chips2" style="justify-content:flex-start;margin-bottom:10px"><span>⏱ ~${minEst} min</span><span>🔥 Racha: ${Y.racha || 0} semanas</span><span>🧘 ${Y.sesiones || 0} sesiones</span></div>` : ''}
+    `${!esYoga ? `<div class="orden"><span>1</span>Calentamiento (ejercicio 1 de la sesión) <i>›</i> <span>2</span>Pliometría <i>›</i> <span>3</span>Resto de la fuerza</div>` : ''}${esYoga ? `<div class="chips2" style="justify-content:flex-start;margin-bottom:10px"><span>⏱ ~${minEst} min</span><span>🔥 Racha: ${Y.racha || 0} semanas</span><span>🧘 ${Y.sesiones || 0} sesiones</span></div>` : ''}
      <div class="avance"><span id="cuentaC">${hechos} de ${c.filas.length} ${esYoga ? 'posturas' : 'ejercicios'}</span><div class="barra"><i id="barraC" style="background:var(--peach);width:${Math.round(hechos / c.filas.length * 100)}%"></i></div></div>
      <button class="accion a1 solo" id="btnGuiado" style="width:100%;margin-top:12px"><b>▶ ${esYoga ? 'Yoga guiado con Sonia' : 'Pliometría guiada'}</b><small>${esYoga ? 'La app cuenta el tiempo de cada postura y avisa cuando cambiar' : 'Serie por serie, con descanso automático de 75 s'}</small></button>
      ${items}<div class="fila-btn" style="margin-top:12px">${pie}</div>`);
@@ -1047,6 +1050,9 @@ function pintarHoy() {
   const dFondo = d.fondo && fechaFondo() ? Math.round((fechaFondo() - new Date(new Date().toDateString())) / 86400000) : 99;
   if (dFondo >= 0 && dFondo <= 2) h += `<div id="climaHoy"></div>`;
   h += tarjetaKine('Antes');
+  const esPlio = d.complemento && d.complemento.tipo === 'plio';
+  contarComp._ok = 0;
+  if (esPlio) h += tarjetaComp();   // pre-entreno: va antes de la fuerza
   (d.cardio || []).forEach((c, i) => {
     const ic = {Natación: '🏊', Trote: '🏃', Bici: '🚴', Carrera: '🏁', Simulacro: '🏁', Activación: '⚡'}[c.tipo] || '🏅';
     const st = (t, v) => v ? `<div class="stat"><small>${t}</small><strong>${esc(v)}</strong></div>` : '';
@@ -1092,7 +1098,7 @@ function pintarHoy() {
   } else if (d.sesion) {
     h += `<div class="card"><h2>${/descanso/i.test(d.sesion) ? '😌' : '🚴'} ${esc(d.sesion)}</h2><div class="sub">Hoy no hay fuerza en casa.</div></div>`;
   }
-  contarComp._ok = 0; h += tarjetaComp();
+  if (!esPlio) h += tarjetaComp();   // yoga: después de entrenar
   if (d.ruta.horario.length) h += tarjeta('ruta', esc(d.ruta.titulo), d.ruta.resumen, lista(d.ruta.horario, 'hora', 'momento', 'que', 'dato'));
   else if (d.ruta.resumen) h += tarjeta('ruta', '🚴 Próximo fondo', d.ruta.resumen, '');
   h += tarjeta('com', '🍽️ Tus comidas de hoy', d.comidas.resumen, lista(d.comidas.filas, 'hora', 'comida', 'que', 'dato'));
