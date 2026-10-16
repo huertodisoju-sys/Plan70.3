@@ -341,6 +341,9 @@
   .orden{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--slate);background:var(--soft);border-radius:12px;padding:8px 10px;margin-bottom:10px}
   .orden span{width:18px;height:18px;border-radius:50%;background:var(--peach);color:#fff;display:inline-grid;place-items:center;font-size:10.5px;font-weight:800}
   .orden i{font-style:normal;color:var(--line)}
+  .techo{display:flex;gap:12px;align-items:center;margin-top:12px;padding:12px;border-radius:14px;background:var(--soft);border-left:5px solid var(--coral)}
+  .techo-n{min-width:64px;text-align:center;font-size:26px;font-weight:800;color:var(--coral);line-height:1}.techo-n small{display:block;font-size:10px;color:var(--slate);font-weight:700}
+  .techo b{font-size:13.5px}.techo span{display:block;font-size:12px;color:var(--slate);line-height:1.45;margin-top:2px}.techo span b{font-size:12px;color:var(--ink)}
   .zlinea{font-size:11.5px;font-weight:700;color:var(--teal);margin-top:8px}
   .cargando{text-align:center;padding:60px 0;color:var(--slate);font-weight:600}
   @media(min-width:640px){.grid{grid-template-columns:repeat(4,1fr)}.stats{grid-template-columns:repeat(6,1fr)}.insignias{grid-template-columns:repeat(6,1fr)}}
@@ -383,7 +386,7 @@
    CONFIGURACIÓN
    ========================================================= */
 // ⬇️ Pega entre las comillas el link de tu app (el que termina en /exec)
-const APP_URL = 'https://script.google.com/macros/s/AKfycbwVhFqcRGDbH6QJ5XE99IzZWXouHoZSpP3ANt3TTJyTOtDGm83w7QKnWJUwLT-XTpSgqw/exec';
+const APP_URL = 'PEGA_AQUI_EL_LINK_DE_TU_APP';
 // Lugar para el pronóstico del domingo (Santiago). Cámbialo si sales desde otro punto.
 const CLIMA_LAT = -33.45, CLIMA_LON = -70.66, CLIMA_LUGAR = 'Santiago';
 
@@ -529,7 +532,7 @@ async function enviar(datos) {
       if (window.google && google.script && google.script.run) google.script.run.withSuccessHandler(ok).withFailureHandler(mal).guardarApp(datos);
       else fetch(APP_URL, {method: 'POST', body: JSON.stringify(datos)}).then(x => x.json()).then(ok).catch(mal);
     });
-    if (r && r.ok) { toast('✅ Guardado en la planilla'); setTimeout(cargar, 600); return true; }
+    if (r && r.ok) { toast('✅ Guardado en la planilla'); setTimeout(() => cargar(true), 600); return true; }
     if (r && r.error === 'pin') { borrar('pin'); toast('Clave incorrecta. Inténtalo de nuevo.'); return false; }
     if (r && r.error === 'sin-pin') { toast('Primero escribe tu clave en App.gs (APP_PIN) y crea una nueva versión.', 5000); return false; }
     toast('No se pudo guardar: ' + ((r && r.error) || 'error'), 4000); return false;
@@ -903,6 +906,18 @@ function zPers(txt, tipo) {   // cambia "Z2 115–134 lpm" del plan por tus zona
   const L = tipo === 'Trote' ? Z.troteFc : Z.bici;
   return String(txt).replace(/Z([1-5])(\s+)(\d{2,3})\s*[–-]\s*(\d{2,3})/g, (m, z, sp) => { const x = L[+z - 1]; return x ? `Z${z}${sp}${x.min}–${x.max}` : m; });
 }
+function techoPulso() {
+  const Z = D.zonas; const b = Z && Z.bici ? Z.bici : null;
+  return { plano: b ? b[1].max : 134, subida: b ? b[2].max : 153 };
+}
+function tarjetaTecho() {
+  const T = techoPulso();
+  const u = (D.actividades && D.actividades.bici || []).find(x => x.an && x.an.techo != null && x.an.mov >= 60);
+  const res = u ? `<div class="ayuda" style="margin-top:8px">📊 Tu última salida larga (${esc(fFecha(u.f))}): <b>${u.an.techo}%</b> del tiempo bajo el techo${u.an.deriva != null && u.an.deriva >= -5 ? ` · deriva ${fmt(u.an.deriva)}%` : ''}. Meta: 80% o más.</div>` : '';
+  return `<div class="techo"><div class="techo-n">${T.plano}<small>lpm</small></div><div><b>Tu techo de pulso</b>
+    <span>En plano no pases de <b>${T.plano}</b>. En subidas puedes llegar a <b>${T.subida}</b>, máximo 5 min seguidos; si lo pasas, baja un cambio y suelta. Come algo cada 20 min desde el inicio.</span></div></div>
+    <div class="ayuda" style="margin-top:6px">⚙️ Configura en tu GEOID una alerta de FC máxima en ${T.plano} lpm (en OnelapFit, ajustes del dispositivo, si tu modelo trae alertas): te avisa en ruta.</div>${res}`;
+}
 function zLinea(tipo) {
   const Z = D.zonas; if (!Z) return '';
   if (tipo === 'Bici') return `Tus zonas: Z2 ${Z.bici[1].min}–${Z.bici[1].max} · Z3 ${Z.bici[2].min}–${Z.bici[2].max} lpm`;
@@ -1062,6 +1077,7 @@ function pintarHoy() {
        <div class="stats">${st('Duración', c.duracion)}${st('Volumen', c.volumen)}${st('Zona', zPers(c.zona, c.tipo))}${st('Esfuerzo (RPE)', c.esfuerzo)}</div>
        ${c.herramienta && c.herramienta !== '—' ? `<div class="herr">🧰 ${esc(c.herramienta)}</div>` : ''}
        ${zl ? `<div class="zlinea">❤️ ${esc(zl)}</div>` : ''}
+       ${c.tipo === 'Bici' && /fondo/i.test(c.titulo + ' ' + d.sesion) ? tarjetaTecho() : ''}
        ${c.estructura ? `<div class="aviso"><b>${c.tipo === 'Bici' ? 'Zonas y claves' : 'Estructura'}:</b> ${esc(zPers(c.estructura, c.tipo))}</div>` : ''}
        <div class="ayuda" style="margin-top:8px">Se registra solo desde Strava: al terminar, sincroniza tu reloj o ciclocomputador.</div>`);
   });
@@ -1475,6 +1491,9 @@ function indicadores(k) {
     const fd = L.find(x => x.an && x.an.deriva != null && x.an.deriva >= -5);   // ignora las no concluyentes
     out.push(I('Deriva FC', fd ? fmt(fd.an.deriva) + '%' : '—', fd ? 'última salida válida · ' + fFecha(fd.f) : 'necesita 1 h con tramos planos', !fd ? 'na' : fd.an.deriva <= 5 ? 'ok' : fd.an.deriva <= 8 ? 'warn' : 'bad',
       'Compara tu FC en la 1ª y la 2ª mitad del fondo a igual velocidad (o potencia), sin los primeros 10 min. Hasta 5% = base aeróbica sólida; 5–8% = bien; sobre 8% = la FC se dispara al final (ritmo inicial muy alto, poca comida o agua, calor o falta de base). Sin potenciómetro se calcula solo con los tramos planos de la ruta, para que las subidas y bajadas no engañen.'));
+    const ft = L.find(x => x.an && x.an.techo != null && x.an.mov >= 60), tp = techoPulso();
+    out.push(I('Techo de pulso', ft ? ft.an.techo + '%' : '—', ft ? 'bajo ' + tp.plano + ' lpm · ' + fFecha(ft.f) : 'en salidas de 1 h o más', !ft ? 'na' : ft.an.techo >= 80 ? 'ok' : ft.an.techo >= 60 ? 'warn' : 'bad',
+      'Porcentaje del tiempo con la FC bajo tu techo (el tope de Z2) en tu última salida larga. Para construir base debería ser 80% o más: si es bajo, estás rodando más fuerte de lo que pide el plan y por eso la FC se dispara al final.'));
     out.push(I('Cadencia media', cad ? Math.round(cad) + ' rpm' : '—', conA.length ? 'solo mientras pedaleas · ideal 85–95' : 'ideal 85–95 rpm', !cad ? 'na' : cad >= 82 && cad <= 98 ? 'ok' : cad >= 72 ? 'warn' : 'bad', 'Pedalear muy lento con mucha fuerza carga rodillas y piernas, y llegas más cansado al trote. Busca 85–95 rpm usando cambios más livianos.'));
     const carga = l => l.reduce((a, x) => a + x.esf, 0) / 4, c1 = carga(u4), c0 = carga(p4), cambio = c0 ? (c1 - c0) / c0 * 100 : 0;
     out.push(I('Carga semanal', c1 ? Math.round(c1) : '—', 'esfuerzo relativo de Strava por semana', !c1 ? 'na' : !c0 || (cambio > -30 && cambio <= 15) ? 'ok' : cambio > 15 ? 'warn' : 'ok',
@@ -1549,7 +1568,7 @@ function filaAct(k, x, i) {
   const kv = (a, b) => b !== '' && b != null && b !== 0 && b !== '0' ? `<div><small>${a}</small><b>${b}</b></div>` : '';
   let det = '';
   const A = k === 'bici' ? x.an : null;
-  if (k === 'bici') det = kv('FC máx', x.fcm) + kv('Cadencia', A && A.cad ? A.cad + ' rpm pedaleando' : x.cad ? x.cad + ' rpm' : '') + kv('Pedaleando', A && A.ped != null ? fmt(A.ped) + '% del tiempo' : '') + kv('Deriva FC', A && A.deriva != null ? fmt(A.deriva) + '%' : '') + kv('Potencia', x.pot ? x.pot + ' W' : '') + kv('Kcal', x.kcal ? fmt(x.kcal) : '') + kv('Esfuerzo', x.esf) + kv('Temp.', x.temp ? x.temp + '°' : '') + kv('Sensación', x.sen);
+  if (k === 'bici') det = kv('FC máx', x.fcm) + kv('Cadencia', A && A.cad ? A.cad + ' rpm pedaleando' : x.cad ? x.cad + ' rpm' : '') + kv('Pedaleando', A && A.ped != null ? fmt(A.ped) + '% del tiempo' : '') + kv('Deriva FC', A && A.deriva != null ? fmt(A.deriva) + '%' : '') + kv('Bajo el techo', A && A.techo != null ? A.techo + '%' : '') + kv('Potencia', x.pot ? x.pot + ' W' : '') + kv('Kcal', x.kcal ? fmt(x.kcal) : '') + kv('Esfuerzo', x.esf) + kv('Temp.', x.temp ? x.temp + '°' : '') + kv('Sensación', x.sen);
   if (k === 'trote') det = kv('FC máx', x.fcm) + kv('Cadencia', x.cad ? x.cad + ' ppm' : '') + kv('Desnivel', x.d ? x.d + ' m' : '') + kv('Kcal', x.kcal ? fmt(x.kcal) : '') + kv('Tipo', x.tipo) + kv('Sensación', x.sen);
   if (k === 'nado') det = kv('FC máx', x.fcm) + kv('Kcal', x.kcal ? fmt(x.kcal) : '') + kv('Sensación', x.sen);
   const zz = A && A.zp && A.zp.length ? A.zp : x.z;
@@ -1602,7 +1621,8 @@ function pintarTodo() {
 }
 function listo(d) {
   D = d; $('refrescar').classList.remove('gira');
-  ck = {}; aplicarCorta();
+  if (d.checkin && d.checkin.hoy) ck = {};
+  aplicarCorta();
   $('fecha').textContent = d.fecha.charAt(0).toUpperCase() + d.fecha.slice(1);
   $('chips').innerHTML = [d.semana ? 'Semana ' + d.semana + ' de ' + (d.plan3 ? d.plan3.semanas : 52) : '', d.fase, d.tipo, 'Actualizado ' + d.actualizado]
     .filter(Boolean).map(x => `<span class="chip">${esc(x)}</span>`).join('');
@@ -1612,18 +1632,32 @@ function fallo(e) {
   $('refrescar').classList.remove('gira');
   $('v0').innerHTML = '<div class="cargando">No pude leer la planilla: ' + esc(e && e.message || e) + '<br>Toca ↻ para reintentar.</div>';
 }
-function cargar() {
+// Apertura rápida: muestra al tiro la última copia guardada en el teléfono y luego la actualiza
+let ultimoTxt = '';
+function recibir(txt) {
+  if (txt === ultimoTxt) { $('refrescar').classList.remove('gira'); return; }   // nada cambió
+  ultimoTxt = txt;
+  try { localStorage.setItem('datosApp', JSON.stringify({ dia: new Date().toDateString(), txt })); } catch (e) {}
+  listo(JSON.parse(txt));
+}
+function cargar(fresco) {
   $('refrescar').classList.add('gira');
   if (window.google && google.script && google.script.run) {   // abierta desde Apps Script
     google.script.run.withSuccessHandler(listo).withFailureHandler(fallo).datosApp();
   } else {                                                      // abierta desde GitHub
-    fetch(APP_URL + '?formato=json&t=' + Date.now())
-      .then(r => { if (!r.ok) throw new Error('error ' + r.status); return r.json(); })
-      .then(listo).catch(fallo);
+    fetch(APP_URL + '?formato=json' + (fresco === true ? '&fresco=1' : '') + '&t=' + Date.now())
+      .then(r => { if (!r.ok) throw new Error('error ' + r.status); return r.text(); })
+      .then(recibir).catch(e => { if (!D) fallo(e); else { $('refrescar').classList.remove('gira'); toast('Sin conexión: muestro lo último guardado', 3000); } });
   }
 }
-$('refrescar').onclick = cargar;
-cargar();
+$('refrescar').onclick = () => cargar(true);
+(function inicio() {
+  try {
+    const c = JSON.parse(localStorage.getItem('datosApp') || 'null');
+    if (c && c.dia === new Date().toDateString() && c.txt) { ultimoTxt = c.txt; listo(JSON.parse(c.txt)); }
+  } catch (e) {}
+  cargar();
+})();
 </script>
 </body>
 </html>
