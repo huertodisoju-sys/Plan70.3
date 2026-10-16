@@ -383,7 +383,7 @@
    CONFIGURACIÓN
    ========================================================= */
 // ⬇️ Pega entre las comillas el link de tu app (el que termina en /exec)
-const APP_URL = 'https://script.google.com/macros/s/AKfycbwVhFqcRGDbH6QJ5XE99IzZWXouHoZSpP3ANt3TTJyTOtDGm83w7QKnWJUwLT-XTpSgqw/exec';
+const APP_URL = 'PEGA_AQUI_EL_LINK_DE_TU_APP';
 // Lugar para el pronóstico del domingo (Santiago). Cámbialo si sales desde otro punto.
 const CLIMA_LAT = -33.45, CLIMA_LON = -70.66, CLIMA_LUGAR = 'Santiago';
 
@@ -1457,8 +1457,9 @@ function indicadores(k) {
   if (!L.length) return [I('Sin registros', '—', k === 'nado' ? 'La natación entra en la semana 53 (oct 2027)' : 'Aún no hay sesiones de esta disciplina', 'na', 'Cuando Strava sincronice tus sesiones aparecerán aquí los indicadores.')];
   const out = [];
   if (k === 'bici') {
-    const conZ = u4.filter(x => x.z.some(z => z > 0));
-    const base = conZ.length ? conZ.reduce((a, x) => a + (x.z[0] + x.z[1]) * x.min, 0) / conZ.reduce((a, x) => a + x.min, 0) : 0;
+    const zDe = x => x.an && x.an.zp && x.an.zp.length ? x.an.zp : x.z;
+    const conZ = u4.filter(x => zDe(x).some(z => z > 0));
+    const base = conZ.length ? conZ.reduce((a, x) => a + (zDe(x)[0] + zDe(x)[1]) * x.min, 0) / conZ.reduce((a, x) => a + x.min, 0) : 0;
     out.push(I('Base aeróbica (Z1–Z2)', conZ.length ? Math.round(base) + '%' : '—', 'del tiempo en las últimas 4 semanas', !conZ.length ? 'na' : base >= 70 ? 'ok' : base >= 50 ? 'warn' : 'bad',
       'Porcentaje del tiempo pedaleando en zonas 1 y 2 (puedes conversar). En las fases de base debería ser 70–80%. Si es bajo, estás yendo demasiado fuerte: acumulas fatiga sin construir resistencia.'));
     const ef = l => prom(l.filter(x => x.fc > 0 && x.min >= 60), x => x.v / x.fc * 100);
@@ -1469,8 +1470,12 @@ function indicadores(k) {
     out.push(I('Constancia', sc + '/8', 'semanas con al menos 1 salida', sc >= 7 ? 'ok' : sc >= 5 ? 'warn' : 'bad', 'La constancia es lo que más mejora la resistencia. Meta: no saltarte más de 1 semana cada 2 meses.'));
     const larga = Math.max(0, ...u4.map(x => x.km)), meta = W && W.bici ? W.bici : 0;
     out.push(I('Fondo más largo', larga ? fmt(larga) + ' km' : '—', meta ? 'meta de esta semana: ' + meta + ' km' : 'últimas 4 semanas', !larga ? 'na' : !meta || larga >= meta * 0.9 ? 'ok' : 'warn', 'Tu salida más larga de las últimas 4 semanas frente al fondo planificado para esta semana en el Plan 3 años.'));
-    const cad = prom(u4, x => x.cad);
-    out.push(I('Cadencia media', cad ? Math.round(cad) + ' rpm' : '—', 'ideal 85–95 rpm', !cad ? 'na' : cad >= 82 && cad <= 98 ? 'ok' : cad >= 72 ? 'warn' : 'bad', 'Pedalear muy lento con mucha fuerza carga rodillas y piernas, y llegas más cansado al trote. Busca 85–95 rpm usando cambios más livianos.'));
+    const conA = u4.filter(x => x.an && x.an.cad);
+    const cad = conA.length ? prom(conA, x => x.an.cad, x => x.an.mov || 1) : prom(u4, x => x.cad);
+    const fd = L.find(x => x.an && x.an.deriva != null);
+    out.push(I('Deriva FC', fd ? fmt(fd.an.deriva) + '%' : '—', fd ? 'última salida larga · ' + fFecha(fd.f) : 'se calcula en salidas de 1 h o más', !fd ? 'na' : fd.an.deriva <= 5 ? 'ok' : fd.an.deriva <= 8 ? 'warn' : 'bad',
+      'Compara tu FC en la 1ª y la 2ª mitad del fondo a igual velocidad (o potencia), sin los primeros 10 min. Hasta 5% = base aeróbica sólida; 5–8% = bien; sobre 8% = la FC se dispara al final (ritmo inicial muy alto, poca comida o agua, calor o falta de base). Es más fiable en rutas planas o en rodillo.'));
+    out.push(I('Cadencia media', cad ? Math.round(cad) + ' rpm' : '—', conA.length ? 'solo mientras pedaleas · ideal 85–95' : 'ideal 85–95 rpm', !cad ? 'na' : cad >= 82 && cad <= 98 ? 'ok' : cad >= 72 ? 'warn' : 'bad', 'Pedalear muy lento con mucha fuerza carga rodillas y piernas, y llegas más cansado al trote. Busca 85–95 rpm usando cambios más livianos.'));
     const carga = l => l.reduce((a, x) => a + x.esf, 0) / 4, c1 = carga(u4), c0 = carga(p4), cambio = c0 ? (c1 - c0) / c0 * 100 : 0;
     out.push(I('Carga semanal', c1 ? Math.round(c1) : '—', 'esfuerzo relativo de Strava por semana', !c1 ? 'na' : !c0 || (cambio > -30 && cambio <= 15) ? 'ok' : cambio > 15 ? 'warn' : 'ok',
       'Promedio semanal del "esfuerzo relativo" de Strava. Subirlo más de 10–15% de un mes a otro aumenta el riesgo de lesión y sobreentrenamiento.', tend(c1, c0, null)));
@@ -1543,13 +1548,16 @@ function filaAct(k, x, i) {
     : `${fmt(x.m)} m · ${esc(x.t)} · ${mmss(x.m ? x.min / x.m * 100 : 0)} /100 m${x.fc ? ' · ♥ ' + x.fc : ''}`;
   const kv = (a, b) => b !== '' && b != null && b !== 0 && b !== '0' ? `<div><small>${a}</small><b>${b}</b></div>` : '';
   let det = '';
-  if (k === 'bici') det = kv('FC máx', x.fcm) + kv('Cadencia', x.cad ? x.cad + ' rpm' : '') + kv('Potencia', x.pot ? x.pot + ' W' : '') + kv('Kcal', x.kcal ? fmt(x.kcal) : '') + kv('Esfuerzo', x.esf) + kv('Temp.', x.temp ? x.temp + '°' : '') + kv('Sensación', x.sen);
+  const A = k === 'bici' ? x.an : null;
+  if (k === 'bici') det = kv('FC máx', x.fcm) + kv('Cadencia', A && A.cad ? A.cad + ' rpm pedaleando' : x.cad ? x.cad + ' rpm' : '') + kv('Pedaleando', A && A.ped != null ? fmt(A.ped) + '% del tiempo' : '') + kv('Deriva FC', A && A.deriva != null ? fmt(A.deriva) + '%' : '') + kv('Potencia', x.pot ? x.pot + ' W' : '') + kv('Kcal', x.kcal ? fmt(x.kcal) : '') + kv('Esfuerzo', x.esf) + kv('Temp.', x.temp ? x.temp + '°' : '') + kv('Sensación', x.sen);
   if (k === 'trote') det = kv('FC máx', x.fcm) + kv('Cadencia', x.cad ? x.cad + ' ppm' : '') + kv('Desnivel', x.d ? x.d + ' m' : '') + kv('Kcal', x.kcal ? fmt(x.kcal) : '') + kv('Tipo', x.tipo) + kv('Sensación', x.sen);
   if (k === 'nado') det = kv('FC máx', x.fcm) + kv('Kcal', x.kcal ? fmt(x.kcal) : '') + kv('Sensación', x.sen);
-  const zonas = k === 'bici' && x.z.some(z => z > 0) ? `<div class="zonas">${x.z.map((z, j) => `<i class="z${j + 1}" style="width:${z}%"></i>`).join('')}</div><div class="zleg">${x.z.map((z, j) => `Z${j + 1} ${Math.round(z)}%`).join(' · ')}</div>` : '';
+  const zz = A && A.zp && A.zp.length ? A.zp : x.z;
+  const zonas = k === 'bici' && zz.some(z => z > 0) ? `${A && A.zp && A.zp.length ? '<div class="zleg" style="margin-top:10px;font-weight:700">Tiempo en tus zonas</div>' : ''}<div class="zonas">${zz.map((z, j) => `<i class="z${j + 1}" style="width:${z}%"></i>`).join('')}</div><div class="zleg">${zz.map((z, j) => `Z${j + 1} ${Math.round(z)}%${A && A.zMin ? ' (' + A.zMin[j] + "')" : ''}`).join(' · ')}</div>` : '';
+  const lect = A && A.lectura ? `<div class="aviso" style="margin-top:10px">${esc(A.lectura)}</div>` : '';
   return `<div class="act ${abiertaAct === id ? 'abierta' : ''}" data-id="${id}"><div class="act-h"><div class="act-f">${fFecha(x.f).replace(' ', '<br>')}</div>
       <div style="flex:1;min-width:0"><b>${esc(x.n)}</b><span>${linea}</span></div><span class="flecha">▾</span></div>
-    <div class="act-d"><div class="kv">${det}</div>${zonas}${x.notas ? `<p class="vacio" style="margin-top:8px">📝 ${esc(x.notas)}</p>` : ''}
+    <div class="act-d"><div class="kv">${det}</div>${zonas}${lect}${x.notas ? `<p class="vacio" style="margin-top:8px">📝 ${esc(x.notas)}</p>` : ''}
       ${x.img ? `<img class="mapa" data-src="${esc(x.img)}" alt="Mapa">` : ''}
       <div class="fila-btn">${x.id ? `<a class="btn2" style="margin-left:0;text-decoration:none" href="https://www.strava.com/activities/${esc(x.id)}" target="_blank" rel="noopener">Strava ↗</a>` : ''}${x.gm ? `<a class="btn2" style="margin-left:0;text-decoration:none" href="${esc(x.gm)}" target="_blank" rel="noopener">Ruta en Google Maps ↗</a>` : ''}</div></div></div>`;
 }
