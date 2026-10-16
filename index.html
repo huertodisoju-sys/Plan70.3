@@ -383,7 +383,7 @@
    CONFIGURACIÓN
    ========================================================= */
 // ⬇️ Pega entre las comillas el link de tu app (el que termina en /exec)
-const APP_URL = 'https://script.google.com/macros/s/AKfycbwVhFqcRGDbH6QJ5XE99IzZWXouHoZSpP3ANt3TTJyTOtDGm83w7QKnWJUwLT-XTpSgqw/exec';
+const APP_URL = 'PEGA_AQUI_EL_LINK_DE_TU_APP';
 // Lugar para el pronóstico del domingo (Santiago). Cámbialo si sales desde otro punto.
 const CLIMA_LAT = -33.45, CLIMA_LON = -70.66, CLIMA_LUGAR = 'Santiago';
 
@@ -1472,9 +1472,9 @@ function indicadores(k) {
     out.push(I('Fondo más largo', larga ? fmt(larga) + ' km' : '—', meta ? 'meta de esta semana: ' + meta + ' km' : 'últimas 4 semanas', !larga ? 'na' : !meta || larga >= meta * 0.9 ? 'ok' : 'warn', 'Tu salida más larga de las últimas 4 semanas frente al fondo planificado para esta semana en el Plan 3 años.'));
     const conA = u4.filter(x => x.an && x.an.cad);
     const cad = conA.length ? prom(conA, x => x.an.cad, x => x.an.mov || 1) : prom(u4, x => x.cad);
-    const fd = L.find(x => x.an && x.an.deriva != null);
-    out.push(I('Deriva FC', fd ? fmt(fd.an.deriva) + '%' : '—', fd ? 'última salida larga · ' + fFecha(fd.f) : 'se calcula en salidas de 1 h o más', !fd ? 'na' : fd.an.deriva <= 5 ? 'ok' : fd.an.deriva <= 8 ? 'warn' : 'bad',
-      'Compara tu FC en la 1ª y la 2ª mitad del fondo a igual velocidad (o potencia), sin los primeros 10 min. Hasta 5% = base aeróbica sólida; 5–8% = bien; sobre 8% = la FC se dispara al final (ritmo inicial muy alto, poca comida o agua, calor o falta de base). Es más fiable en rutas planas o en rodillo.'));
+    const fd = L.find(x => x.an && x.an.deriva != null && x.an.deriva >= -5);   // ignora las no concluyentes
+    out.push(I('Deriva FC', fd ? fmt(fd.an.deriva) + '%' : '—', fd ? 'última salida válida · ' + fFecha(fd.f) : 'necesita 1 h con tramos planos', !fd ? 'na' : fd.an.deriva <= 5 ? 'ok' : fd.an.deriva <= 8 ? 'warn' : 'bad',
+      'Compara tu FC en la 1ª y la 2ª mitad del fondo a igual velocidad (o potencia), sin los primeros 10 min. Hasta 5% = base aeróbica sólida; 5–8% = bien; sobre 8% = la FC se dispara al final (ritmo inicial muy alto, poca comida o agua, calor o falta de base). Sin potenciómetro se calcula solo con los tramos planos de la ruta, para que las subidas y bajadas no engañen.'));
     out.push(I('Cadencia media', cad ? Math.round(cad) + ' rpm' : '—', conA.length ? 'solo mientras pedaleas · ideal 85–95' : 'ideal 85–95 rpm', !cad ? 'na' : cad >= 82 && cad <= 98 ? 'ok' : cad >= 72 ? 'warn' : 'bad', 'Pedalear muy lento con mucha fuerza carga rodillas y piernas, y llegas más cansado al trote. Busca 85–95 rpm usando cambios más livianos.'));
     const carga = l => l.reduce((a, x) => a + x.esf, 0) / 4, c1 = carga(u4), c0 = carga(p4), cambio = c0 ? (c1 - c0) / c0 * 100 : 0;
     out.push(I('Carga semanal', c1 ? Math.round(c1) : '—', 'esfuerzo relativo de Strava por semana', !c1 ? 'na' : !c0 || (cambio > -30 && cambio <= 15) ? 'ok' : cambio > 15 ? 'warn' : 'ok',
