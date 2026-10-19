@@ -344,6 +344,14 @@
   .techo{display:flex;gap:12px;align-items:center;margin-top:12px;padding:12px;border-radius:14px;background:var(--soft);border-left:5px solid var(--coral)}
   .techo-n{min-width:64px;text-align:center;font-size:26px;font-weight:800;color:var(--coral);line-height:1}.techo-n small{display:block;font-size:10px;color:var(--slate);font-weight:700}
   .techo b{font-size:13.5px}.techo span{display:block;font-size:12px;color:var(--slate);line-height:1.45;margin-top:2px}.techo span b{font-size:12px;color:var(--ink)}
+  .rsug{margin:4px 0 12px;padding:12px;border-radius:14px;background:var(--soft);border-left:5px solid var(--teal)}
+  .ritem{border-top:1px solid var(--line);padding:12px 0}
+  .rsug-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.rsug-h small{font-size:11px;font-weight:700;color:var(--slate)}
+  .rsug-n{display:block;font-size:15px;margin-top:6px}.ritem b{font-size:14px}
+  .rsug-d{font-size:12px;color:var(--slate);font-weight:700;margin-top:4px}
+  .rsug p,.ritem p{font-size:12.5px;line-height:1.45;margin-top:6px}
+  .rtag{font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 9px;color:#fff;background:var(--slate)}
+  .rtag.t-Plano{background:var(--teal)}.rtag.t-Ondulado{background:var(--peach)}.rtag.t-Montaña{background:var(--coral)}
   .zlinea{font-size:11.5px;font-weight:700;color:var(--teal);margin-top:8px}
   .cargando{text-align:center;padding:60px 0;color:var(--slate);font-weight:600}
   @media(min-width:640px){.grid{grid-template-columns:repeat(4,1fr)}.stats{grid-template-columns:repeat(6,1fr)}.insignias{grid-template-columns:repeat(6,1fr)}}
@@ -386,7 +394,7 @@
    CONFIGURACIÓN
    ========================================================= */
 // ⬇️ Pega entre las comillas el link de tu app (el que termina en /exec)
-const APP_URL = 'https://script.google.com/macros/s/AKfycbwVhFqcRGDbH6QJ5XE99IzZWXouHoZSpP3ANt3TTJyTOtDGm83w7QKnWJUwLT-XTpSgqw/exec';
+const APP_URL = 'PEGA_AQUI_EL_LINK_DE_TU_APP';
 // Lugar para el pronóstico del domingo (Santiago). Cámbialo si sales desde otro punto.
 const CLIMA_LAT = -33.45, CLIMA_LON = -70.66, CLIMA_LUGAR = 'Santiago';
 
@@ -906,6 +914,39 @@ function zPers(txt, tipo) {   // cambia "Z2 115–134 lpm" del plan por tus zona
   const L = tipo === 'Trote' ? Z.troteFc : Z.bici;
   return String(txt).replace(/Z([1-5])(\s+)(\d{2,3})\s*[–-]\s*(\d{2,3})/g, (m, z, sp) => { const x = L[+z - 1]; return x ? `Z${z}${sp}${x.min}–${x.max}` : m; });
 }
+/* =========================================================
+   RUTAS DESDE LA CISTERNA
+   ========================================================= */
+const puntos = n => '●'.repeat(Math.max(0, Math.min(5, n))) + '○'.repeat(5 - Math.max(0, Math.min(5, n)));
+const vecesTxt = r => r.veces ? `la has hecho ${r.veces} ${r.veces === 1 ? 'vez' : 'veces'}${r.ultima ? ' · última ' + r.ultima + (r.kmAprox && r.kmUltima ? ' (' + fmt(r.kmUltima) + ' km)' : '') : ''}` : 'nueva para ti';
+function bloqueRuta() {
+  const R = D.rutas; if (!R || !R.sugerida) return '';
+  const r = R.sugerida;
+  return `<div class="rsug"><div class="rsug-h"><span class="rtag t-${esc(r.tipo)}">${esc(r.tipo)}</span><small>Ruta sugerida para tu fondo de ${esc(R.objetivo.km)} km</small></div>
+    <b class="rsug-n">🗺️ ${esc(r.nombre)}</b>
+    <div class="rsug-d">${fmt(r.km)} km${r.kmAprox ? ' aprox' : ''} · ↗ ${fmt(r.desnivel)} m · ${puntos(r.dif)} · ${esc(vecesTxt(r))}</div>
+    <p>${esc(r.porque)}</p>${r.ojo ? `<p class="vacio">⚠️ ${esc(r.ojo)}</p>` : ''}
+    <div class="fila-btn">${r.maps ? `<a class="btn2" style="margin-left:0;text-decoration:none" href="${esc(r.maps)}" target="_blank" rel="noopener">Ver en Google Maps ↗</a>` : ''}<button class="btn2" id="btnRutas">Otras rutas</button></div></div>`;
+}
+let rutaFiltro = 'Todas';
+function itemRuta(r) {
+  return `<div class="ritem"><div class="rsug-h"><span class="rtag t-${esc(r.tipo)}">${esc(r.tipo)}</span><b>${esc(r.nombre)}</b></div>
+    <div class="rsug-d">${fmt(r.km)} km${r.kmAprox ? ' aprox' : ''} · ↗ ${fmt(r.desnivel)} m · ${puntos(r.dif)} · ${esc(vecesTxt(r))}</div>
+    ${r.porque ? `<p>${esc(r.porque)}</p>` : r.recorrido ? `<p>${esc(r.recorrido)}</p>` : ''}${r.para ? `<p class="vacio">🎯 ${esc(r.para)}</p>` : ''}${r.ojo ? `<p class="vacio">⚠️ ${esc(r.ojo)}</p>` : ''}
+    <div class="fila-btn">${r.maps ? `<a class="btn2" style="margin-left:0;text-decoration:none" href="${esc(r.maps)}" target="_blank" rel="noopener">Google Maps ↗</a>` : ''}${r.strava ? `<a class="btn2" style="margin-left:0;text-decoration:none" href="${esc(r.strava)}" target="_blank" rel="noopener">Tu salida en Strava ↗</a>` : ''}</div></div>`;
+}
+function abrirRutas() {
+  const R = D.rutas; if (!R) return;
+  const f = rutaFiltro;
+  const L = R.lista.filter(r => f === 'Todas' || (f === 'Tuyas' ? r.origen !== 'Conocida' : r.tipo === f)).sort((a, b) => a.km - b.km);
+  abrirHoja(`<h3>🗺️ Rutas desde La Cisterna</h3><div class="sub">Km ida y vuelta desde la casa. "Aprox" = estimado: cuando hagas la ruta se reemplaza por tu dato real de Strava. En Google Maps ves el recorrido exacto en modo bicicleta.</div>
+    ${R.objetivo && R.alternativas.length ? `<h4>Otras opciones para tu fondo de ${esc(R.objetivo.km)} km (${esc(String(R.objetivo.tipo).toLowerCase())})</h4>${R.alternativas.map(itemRuta).join('')}` : ''}
+    <h4>Todas las rutas</h4><div class="chipsel" id="rFil">${['Todas', 'Plano', 'Ondulado', 'Montaña', 'Tuyas'].map(x => `<button data-f="${x}" class="${x === f ? 'on' : ''}">${x}</button>`).join('')}</div>
+    ${L.map(itemRuta).join('') || '<div class="vacio">No hay rutas con ese filtro.</div>'}
+    <div class="ayuda" style="margin-top:10px">Para agregar o quitar rutas, usa la hoja "Rutas" de tu planilla.</div>
+    <button class="primario" onclick="cerrarHoja()">Listo</button>`);
+  $('rFil').querySelectorAll('button').forEach(b => b.onclick = () => { rutaFiltro = b.dataset.f; abrirRutas(); $('hoja').scrollTop = 0; });
+}
 function techoPulso() {
   const Z = D.zonas; const b = Z && Z.bici ? Z.bici : null;
   return { plano: b ? b[1].max : 134, subida: b ? b[2].max : 153 };
@@ -1115,13 +1156,14 @@ function pintarHoy() {
     h += `<div class="card"><h2>${/descanso/i.test(d.sesion) ? '😌' : '🚴'} ${esc(d.sesion)}</h2><div class="sub">Hoy no hay fuerza en casa.</div></div>`;
   }
   if (!esPlio) h += tarjetaComp();   // yoga: después de entrenar
-  if (d.ruta.horario.length) h += tarjeta('ruta', esc(d.ruta.titulo), d.ruta.resumen, lista(d.ruta.horario, 'hora', 'momento', 'que', 'dato'));
-  else if (d.ruta.resumen) h += tarjeta('ruta', '🚴 Próximo fondo', d.ruta.resumen, '');
+  if (d.ruta.horario.length) h += tarjeta('ruta', esc(d.ruta.titulo), d.ruta.resumen, bloqueRuta() + lista(d.ruta.horario, 'hora', 'momento', 'que', 'dato'));
+  else if (d.ruta.resumen) h += tarjeta('ruta', '🚴 Próximo fondo', d.ruta.resumen, bloqueRuta());
   h += tarjeta('com', '🍽️ Tus comidas de hoy', d.comidas.resumen, lista(d.comidas.filas, 'hora', 'comida', 'que', 'dato'));
   h += tarjetaKine('Después');
   $('v0').innerHTML = h;
   activarKine($('v0')); activarComp($('v0')); activarCheckin($('v0'));
   if ($('btnMover')) $('btnMover').onclick = abrirMover;
+  if ($('btnRutas')) $('btnRutas').onclick = () => { rutaFiltro = 'Todas'; abrirRutas(); };
   contarHechos();
   if ($('btnEntreno')) $('btnEntreno').onclick = abrirEntreno;
   $('btnPeso').onclick = abrirPeso;
@@ -1338,7 +1380,7 @@ function pintarSemana() {
         <div class="info"><div class="nom"><span>${esc(d.dia)} ${esc(d.fecha)}</span>${s.macro ? '' : `<span class="estado e-${d.estado}">${txtEstado[d.estado]}${d.registrados ? ' · ✍️' + d.registrados : ''}</span>`}</div>
           <h4>${esc(d.sesion)}</h4>${d.detalle ? `<p>${esc(zPers(d.detalle, d.tipo === 'trote' ? 'Trote' : 'Bici'))}</p>` : ''}
           ${d.extras.map(x => `<em class="tag">${esc(x)}</em>`).join('')}
-          ${D.fondo && String(D.fondo.fecha).indexOf(d.fecha) >= 0 && !s.macro ? `<em class="tag">🍌 ${esc(D.fondo.bidones)} caramayolas · ${esc(D.fondo.tipo)}</em>` : ''}
+          ${D.fondo && String(D.fondo.fecha).indexOf(d.fecha) >= 0 && !s.macro ? `<em class="tag">🍌 ${esc(D.fondo.bidones)} caramayolas · ${esc(D.fondo.tipo)}</em>${D.rutas && D.rutas.sugerida ? `<em class="tag">🗺️ ${esc(D.rutas.sugerida.nombre)}</em>` : ''}` : ''}
         </div></div>`).join('');
     const w = P ? P.semanas3.find(x => x.s === s.numero) : null;
     h = `<div class="card"><h2>📅 Semana ${s.numero} de ${P ? P.semanas : 52}</h2><div class="sub">${esc(s.fase)} · ${esc(String(s.tipo).toLowerCase())}${w ? ` · ${fmt(w.horas)} h planificadas` : ''}</div>
