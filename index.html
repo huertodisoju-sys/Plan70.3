@@ -15,6 +15,7 @@
 <meta name="theme-color" content="#2b7bc0">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="figuras.js?v=1"></script>
 <style>
   :root{--bg:#fffdf7;--card:#fff;--soft:#eef6fc;--soft2:#fff6dc;--line:#dbe9f5;--ink:#1f3a5f;--slate:#5e7591;
         --blue:#2b7bc0;--cel:#5db7e8;--sun:#f7c948;--peach:#f4a259;--coral:#e76f51;--teal:#2a9d8f;
@@ -97,7 +98,20 @@
   .lnk{background:none;border:none;color:var(--blue);font-weight:800;font-size:12px;padding:0}
   .btn2{margin-left:auto;border:none;background:var(--soft);color:var(--blue);font-weight:800;font-size:12px;border-radius:10px;padding:7px 11px}
   .guia{max-height:0;overflow:hidden;transition:max-height .35s ease}
-  .guia.abierta{max-height:900px}
+  .guia.abierta{max-height:1800px}
+  /* fichas animadas de ejercicios */
+  :root{--fig-ink:var(--ink);--fig-far:#9fb3cc;--fig-bg:var(--soft);--fig-prop:#d5e3f0;--fig-edge:#a9c1d9;--fig-floor:#c9dbeb;--fig-acc:var(--peach);--fig-acc2:var(--coral);--fig-ink2:var(--teal);--fig-far2:#93d1c8;--fig-kbl:#c4692a}
+  [data-tema=oscuro]{--fig-far:#5f7594;--fig-prop:#2a4064;--fig-edge:#3b5680;--fig-floor:#2f4568;--fig-far2:#2f7f75}
+  .figmini{width:44px;height:44px;flex:none;border-radius:11px;background:var(--soft);overflow:hidden;border:none;padding:0;cursor:pointer}
+  .figmini svg{width:100%;height:100%;display:block}
+  .fig{background:var(--soft);border-radius:14px;margin-top:10px!important}
+  .fig svg{width:100%;height:auto;display:block;max-height:300px}
+  .figctl{display:flex;gap:6px;justify-content:center;margin-top:8px!important}
+  .figctl button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 11px;font:inherit;font-size:11.5px;font-weight:700}
+  .figctl button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .g0 b{color:var(--blue)}.g0 ol{padding-left:18px;margin:0}.g0 li{margin-bottom:4px}
+  .e-fig{width:min(230px,58vw);margin:12px auto 0;background:var(--soft);border-radius:16px;overflow:hidden}
+  .e-fig svg{width:100%;height:auto;display:block}
   .guia div{margin-top:10px;font-size:12.5px;line-height:1.5}
   .guia b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
   .g1 b{color:var(--teal)}.g2 b{color:var(--coral)}.g3 b{color:var(--blue)}.g4 b{color:var(--peach)}
@@ -547,6 +561,31 @@ async function enviar(datos) {
   } catch (e) { toast('Sin conexión con la planilla. Inténtalo de nuevo.', 4000); return false; }
 }
 
+/* ---------- Fichas animadas (figuras.js) ---------- */
+const FIG = window.Figuras || null;
+const tieneFig = n => !!(FIG && FIG.tiene(n));
+const figMini = n => tieneFig(n) ? `<button class="figmini" title="Ver cómo se hace">${FIG.svg(n, 1, { flechas: false })}</button>` : '';
+function figGuia(n) {
+  if (!tieneFig(n)) return '';
+  const i = FIG.info(n);
+  return `<div class="fig" data-fig="${esc(n)}"></div>
+    <div class="figctl"><button class="on" data-m="a">▶ Movimiento</button><button data-m="0">Inicio</button><button data-m="1">Final</button></div>
+    <div class="g0"><b>Paso a paso</b><ol>${i.cues.map(c => `<li>${esc(c)}</li>`).join('')}</ol></div>`;
+}
+let figGuiaStop = () => {}, figGuiaEl = null;   // una sola animación a la vez en la vista Hoy
+function figAbrir(cont) {
+  const el = cont.querySelector('.fig'); if (!el || !FIG) return;
+  const n = el.dataset.fig; figGuiaStop(); figGuiaEl = el; figGuiaStop = FIG.animar(el, n);
+  cont.querySelectorAll('.figctl button').forEach(b => { b.classList.toggle('on', b.dataset.m === 'a'); b.onclick = () => {
+    cont.querySelectorAll('.figctl button').forEach(x => x.classList.remove('on')); b.classList.add('on');
+    figGuiaStop(); figGuiaStop = () => {}; figGuiaEl = el;
+    if (b.dataset.m === 'a') figGuiaStop = FIG.animar(el, n); else el.innerHTML = FIG.svg(n, +b.dataset.m);
+  }; });
+}
+function figCerrar(cont) { const el = cont.querySelector('.fig'); if (el && el === figGuiaEl) { figGuiaStop(); figGuiaStop = () => {}; figGuiaEl = null; } }
+let figPlayer = () => {};
+function figEn(id, n) { figPlayer(); figPlayer = () => {}; const el = $(id); if (el && tieneFig(n)) figPlayer = FIG.animar(el, n); }
+
 /* ---------- Registrar un ejercicio ---------- */
 function abrirRegistro(i) {
   const e = D.ejercicios[i]; if (!e) return;
@@ -701,10 +740,10 @@ function tarjetaComp() {
     const hecho = leer(claveComp(c.clave, f.n)) === '1';
     const t = pasosDe(f, esYoga).find(p => p.tipo === 'trabajo' && p.seg);
     return `<div class="kin cmp${hecho ? ' hecho' : ''}" data-n="${esc(f.n)}">
-      <div class="top"><div class="num">${hecho ? '✓' : esc(f.n)}</div><div style="flex:1;min-width:0"><h3>${esc(f.que)}</h3><div class="bloque">${esc(f.dosis)}${f.contactos ? ' · ' + f.contactos + ' contactos' : ''}</div></div>
+      <div class="top"><div class="num">${hecho ? '✓' : esc(f.n)}</div>${figMini(f.que)}<div style="flex:1;min-width:0"><h3>${esc(f.que)}</h3><div class="bloque">${esc(f.dosis)}${f.contactos ? ' · ' + f.contactos + ' contactos' : ''}</div></div>
         <button class="check">${hecho ? 'Hecho' : 'Marcar'}</button></div>
       <div class="fila-btn"><button class="lnk guiaBtn">📖 Cómo hacerlo ▾</button>${t ? `<button class="btn2 relojC" data-seg="${t.seg}">⏱ ${mmss(t.seg / 60)}</button>` : ''}</div>
-      <div class="guia"><div class="g1"><b>Cómo hacerlo</b>${esc(f.como)}</div></div></div>`;
+      <div class="guia">${figGuia(f.que)}${tieneFig(f.que) ? '' : `<div class="g1"><b>Cómo hacerlo</b>${esc(f.como)}</div>`}</div></div>`;
   }).join('');
   const pie = esYoga ? (Y.hoy ? `<span class="guardado">✓ Sesión de hoy guardada en la planilla</span>` : `<button class="btn2" id="guardarYoga" style="margin-left:0">💾 Guardar sesión de yoga</button>`) : '';
   return tarjeta('comp', esc(c.titulo), c.resumen,
@@ -727,7 +766,9 @@ function activarComp(cont) {
       const si = !k.classList.contains('hecho'); k.classList.toggle('hecho', si); guardar(claveComp(c.clave, k.dataset.n), si ? '1' : '0');
       k.querySelector('.check').textContent = si ? 'Hecho' : 'Marcar'; k.querySelector('.num').textContent = si ? '✓' : k.dataset.n; contarComp();
     };
-    k.querySelector('.guiaBtn').onclick = ev => { const g = k.querySelector('.guia'); g.classList.toggle('abierta'); ev.target.textContent = g.classList.contains('abierta') ? '📖 Ocultar ▴' : '📖 Cómo hacerlo ▾'; };
+    const gb = k.querySelector('.guiaBtn');
+    gb.onclick = () => { const g = k.querySelector('.guia'); g.classList.toggle('abierta'); const ab = g.classList.contains('abierta'); gb.textContent = ab ? '📖 Ocultar ▴' : '📖 Cómo hacerlo ▾'; if (ab) figAbrir(g); else figCerrar(g); };
+    const fm = k.querySelector('.figmini'); if (fm) fm.onclick = () => { if (!k.querySelector('.guia').classList.contains('abierta')) gb.onclick(); };
     const r = k.querySelector('.relojC'); if (r) r.onclick = () => iniciarTimer(+r.dataset.seg);
   });
   if ($('btnGuiado')) $('btnGuiado').onclick = abrirGuiado;
@@ -754,7 +795,7 @@ function abrirGuiado() {
   $('entreno').classList.add('on'); document.body.style.overflow = 'hidden'; pintarGuiado();
 }
 function salirGuiado() {
-  clearInterval(gInt); $('entreno').classList.remove('on'); document.body.style.overflow = '';
+  clearInterval(gInt); figPlayer(); $('entreno').classList.remove('on'); document.body.style.overflow = '';
   try { if (wake) wake.release(); } catch (e) {} wake = null; G = null; pintarHoy();
 }
 function marcarItemSiCompleto(item) {
@@ -778,6 +819,7 @@ function pintarGuiado() {
   $('entreno').innerHTML = `<div class="e-top"><button id="gSalir">✕ Salir</button><div class="barra"><i style="width:${Math.round(hechos / total * 100)}%;background:${colores.trabajo}"></i></div><span>${hechos}/${total}</span></div>
     <div class="e-cuerpo" id="gCuerpo"><div class="e-bloque" style="color:${colores[p.tipo]}">${titulo}</div>
       <div class="e-nombre">${esc(p.tipo === 'descanso' ? 'Respira y suelta' : p.nombre)}</div>
+      ${p.tipo !== 'descanso' && tieneFig(p.nombre) ? '<div class="e-fig" id="gFig"></div>' : ''}
       ${p.sub ? `<div class="e-serie">${esc(p.sub)}</div>` : ''}
       ${timed ? `<div class="e-ring" id="gRing"><div><div><b id="gSeg">${p.seg}</b><small>segundos</small></div></div></div>`
               : `<div class="e-obj" style="font-size:18px;font-weight:800;color:var(--ink);margin-top:22px">${esc(/^\d+$/.test(p.reps) ? p.reps + ' repeticiones' : (p.reps || 'A tu ritmo'))}</div><div class="e-obj">Cuando termines, toca "Listo"</div>`}
@@ -785,6 +827,7 @@ function pintarGuiado() {
       ${p.tipo !== 'trabajo' && p.nombre && p.tipo === 'prep' ? `<div class="e-obj" style="margin-top:12px">Ponte en posición</div>` : ''}
       ${sig && p.tipo === 'trabajo' ? `<div class="e-obj" style="margin-top:14px">Después: ${esc(sig.nombre)}</div>` : ''}</div>
     <div class="e-pie">${timed ? `<button class="e-alt" id="gPausa">${G.pausa ? '▶ Seguir' : '⏸ Pausa'}</button><button class="e-ok" id="gSig">Saltar ›</button>` : `<button class="e-ok" id="gSig">✓ Listo</button>`}</div>`;
+  figEn('gFig', p.nombre);
   $('gSalir').onclick = () => { if (G.hechos.size) finGuiado(); else salirGuiado(); };
   $('gSig').onclick = siguientePaso;
   if (timed) {
@@ -1128,7 +1171,7 @@ function pintarHoy() {
       const reg = e.omitido ? `<span class="guardado omit">Marcado como no hecho</span>`
         : e.registrado ? `<span class="guardado">✓ En la planilla: ${e.conPeso && e.kgReal != null ? fmt(e.kgReal) + ' kg · ' : ''}${e.repsReal.length ? e.repsReal.join('/') + ' reps' : ''}${e.rpeReal ? ' · RPE ' + fmt(e.rpeReal) : ''}</span>` : '';
       return `<div class="ej${hecho ? ' hecho' : ''}" data-i="${i}">
-        <div class="top"><div class="num">${hecho ? '✓' : i + 1}</div><div><h3>${esc(e.ejercicio)}</h3><div class="bloque">${esc(e.bloque)}</div></div>
+        <div class="top"><div class="num">${hecho ? '✓' : i + 1}</div>${figMini(e.ejercicio)}<div><h3>${esc(e.ejercicio)}</h3><div class="bloque">${esc(e.bloque)}</div></div>
           <button class="check">${hecho ? 'Hecho' : 'Marcar'}</button></div>
         <div class="stats">
           <div class="stat"><small>Series</small><strong>${esc(e.series)}</strong></div>
@@ -1141,8 +1184,8 @@ function pintarHoy() {
         ${e.herramienta && e.herramienta !== 'Peso corporal' ? `<div class="herr">🧰 ${esc(e.herramienta)}</div>` : ''}
         ${reg}
         <div class="fila-btn"><button class="lnk guiaBtn">📖 Ver cómo hacerlo ▾</button>${e.fila ? `<button class="btn2 regBtn">✍️ Registrar</button>` : ''}</div>
-        <div class="guia">
-          <div class="g1"><b>Cómo hacerlo</b>${esc(e.clave)}${e.claves ? '. ' + esc(e.claves) : ''}</div>
+        <div class="guia">${figGuia(e.ejercicio)}
+          ${tieneFig(e.ejercicio) ? '' : `<div class="g1"><b>Cómo hacerlo</b>${esc(e.clave)}${e.claves ? '. ' + esc(e.claves) : ''}</div>`}
           ${e.error ? `<div class="g2"><b>Error común</b>${esc(e.error)}</div>` : ''}
           ${e.musculos ? `<div class="g3"><b>Músculos</b>${esc(e.musculos)}</div>` : ''}
           ${e.porque ? `<div class="g4"><b>Por qué te sirve</b>${esc(e.porque)}</div>` : ''}
@@ -1178,10 +1221,14 @@ function pintarHoy() {
       ej.querySelector('.num').textContent = si ? '✓' : i + 1;
       contarHechos();
     };
-    ej.querySelector('.guiaBtn').onclick = ev => {
+    const gb = ej.querySelector('.guiaBtn');
+    gb.onclick = () => {
       const g = ej.querySelector('.guia'); g.classList.toggle('abierta');
-      ev.target.textContent = g.classList.contains('abierta') ? '📖 Ocultar guía ▴' : '📖 Ver cómo hacerlo ▾';
+      const ab = g.classList.contains('abierta');
+      gb.textContent = ab ? '📖 Ocultar guía ▴' : '📖 Ver cómo hacerlo ▾';
+      if (ab) figAbrir(g); else figCerrar(g);
     };
+    const fm = ej.querySelector('.figmini'); if (fm) fm.onclick = () => { if (!ej.querySelector('.guia').classList.contains('abierta')) gb.onclick(); ej.querySelector('.guia').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
     const rb = ej.querySelector('.regBtn'); if (rb) rb.onclick = () => abrirRegistro(i);
     ej.querySelector('.stat.reloj').onclick = function () { iniciarTimer(+this.dataset.seg); };
   });
@@ -1206,7 +1253,7 @@ function abrirEntreno() {
   $('entreno').classList.add('on'); document.body.style.overflow = 'hidden'; pintarEntreno();
 }
 function salirEntreno() {
-  clearInterval(eInt); $('entreno').classList.remove('on'); document.body.style.overflow = '';
+  clearInterval(eInt); figPlayer(); $('entreno').classList.remove('on'); document.body.style.overflow = '';
   try { if (wake) wake.release(); } catch (e) {} wake = null; pintarHoy();
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && E && $('entreno').classList.contains('on')) pedirPantallaEncendida(); });
@@ -1217,7 +1264,7 @@ function pintarEntreno() {
   const e = lista[E.i], r = E.res[E.i], ns = Math.max(1, e.nSeries || 1);
   const prog = Math.round((E.i + (E.serie - 1) / ns) / n * 100);
   let cuerpo = '', pie = '';
-  const cab = `<div class="e-bloque">${esc(e.bloque)}</div><div class="e-nombre">${esc(e.ejercicio)}</div>
+  const cab = `<div class="e-bloque">${esc(e.bloque)}</div><div class="e-nombre">${esc(e.ejercicio)}</div>${E.modo !== 'rpe' && tieneFig(e.ejercicio) ? '<div class="e-fig" id="eFig"></div>' : ''}
     <div class="e-tags"><em class="tag">${esc(e.series)} × ${esc(e.reps)}</em><em class="tag">${esc(e.peso)}</em><em class="tag">RPE ${esc(e.rpe)}</em>${e.tempo ? `<em class="tag">Tempo ${esc(e.tempo)}</em>` : ''}</div>`;
   if (E.modo === 'serie') {
     const objetivo = e.repsObj || 0;
@@ -1238,6 +1285,7 @@ function pintarEntreno() {
   }
   $('entreno').innerHTML = `<div class="e-top"><button id="eSalir">✕ Salir</button><div class="barra"><i style="width:${prog}%;background:var(--teal)"></i></div>
       <span>${E.i + 1}/${n}</span></div><div class="e-cuerpo" id="eCuerpo">${cuerpo}</div><div class="e-pie">${pie}</div>`;
+  figEn('eFig', e.ejercicio);
   $('eSalir').onclick = () => { if (E.res.some(x => x.hecho)) { E.modo = 'fin'; pintarEntreno(); } else salirEntreno(); };
   $('entreno').querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const v = $('eReps'); v.textContent = Math.max(0, +v.textContent + +b.dataset.d); });
   $('entreno').querySelectorAll('[data-k]').forEach(b => b.onclick = () => { r.kg = Math.max(0, Math.round((+r.kg + +b.dataset.k) * 10) / 10); $('eKg').textContent = fmt(r.kg); });
